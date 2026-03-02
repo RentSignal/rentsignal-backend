@@ -40,8 +40,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers( "/oauth2/**", "/login/**", "/api/auth/**").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers( "/api/community/**", "/api/mypage/**").authenticated()
+                        .anyRequest().permitAll())
 
                 .oauth2Login(oauth -> oauth
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
