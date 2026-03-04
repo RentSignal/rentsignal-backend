@@ -32,7 +32,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final AuthService authService;
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         // 1. provider에서 사용자 정보 (attributes) 조회
         OAuth2User oAuth2User = super.loadUser(userRequest);
