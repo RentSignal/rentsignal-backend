@@ -21,6 +21,7 @@ spring:
             scope:
               - name
               - nickname
+              - profile_image
             client-name: Naver
             authorization-grant-type: authorization_code
         provider:

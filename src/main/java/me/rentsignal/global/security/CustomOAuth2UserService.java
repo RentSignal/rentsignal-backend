@@ -32,7 +32,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final AuthService authService;
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         // 1. provider에서 사용자 정보 (attributes) 조회
         OAuth2User oAuth2User = super.loadUser(userRequest);
@@ -70,13 +70,20 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     public User createUserWithSocialAccount(Provider provider,
                                              String providerUserId,
                                              OAuth2UserInfo userInfo) {
-        // name이 null이면 랜던 생성
+        // name이 null이면 랜덤 생성
         String name = userInfo.getName();
         if (name == null || name.isEmpty())
             name = authService.generateTempName();
 
+        // imageUrl이 null이면 디폴트 이미지 등록
+        // TODO : S3에 디폴트 이미지 등록 후 url 수정
+        String imageUrl = userInfo.getImageUrl();
+        if (imageUrl == null || imageUrl.isEmpty())
+            imageUrl = "default.png";
+
         User user = userRepository.save(
                 User.builder().name(name)
+                        .imageUrl(imageUrl)
                         .role(Role.ROLE_GUEST).build()
         );
 
