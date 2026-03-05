@@ -11,6 +11,7 @@ import me.rentsignal.user.entity.RefreshToken;
 import me.rentsignal.user.entity.User;
 import me.rentsignal.user.repository.RefreshTokenRepository;
 import me.rentsignal.user.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class TokenService {
+
+    @Value("${COOKIE_SECURE}")
+    private boolean COOKIE_SECURE;
+
+    @Value("${COOKIE_SAMESITE}")
+    private String COOKIE_SAMESITE;
 
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -69,11 +76,10 @@ public class TokenService {
 
         // 4. 새 토큰 발급 + HttpOnly 쿠키로 세팅
         TokenDto tokens = createAndSaveToken(userIdFromToken);
-        // TODO : 배포 시 Secure = true, SameSite = None으로 설정
         cookieUtil.addCookie(response, "accessToken", tokens.getAccessToken(),
-                (int) (JwtProvider.EXPIRE_ACCESS / 1000), false, "Lax");
+                (int) (JwtProvider.EXPIRE_ACCESS / 1000), COOKIE_SECURE, COOKIE_SAMESITE);
         cookieUtil.addCookie(response, "refreshToken", tokens.getRefreshToken(),
-                (int) (JwtProvider.EXPIRE_REFRESH / 1000), false, "Lax");
+                (int) (JwtProvider.EXPIRE_REFRESH / 1000), COOKIE_SECURE, COOKIE_SAMESITE);
     }
 
 }

@@ -21,7 +21,12 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final JwtProvider jwtProvider;
+    @Value("${COOKIE_SECURE}")
+    private boolean COOKIE_SECURE;
+
+    @Value("${COOKIE_SAMESITE}")
+    private String COOKIE_SAMESITE;
+
     private final CookieUtil cookieUtil;
     private final TokenService tokenService;
 
@@ -37,11 +42,11 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         TokenDto tokens = tokenService.createAndSaveToken(principal.getId());
 
         // 3. HttpOnly 쿠키로 토큰 내려주기
-        // TODO : 배포 시 Secure = true, SameSite = None으로 설정
+        // TODO : 배포 시 Secure = true, SameSite = None으로 환경변수 값 변경 필요
         cookieUtil.addCookie(response, "accessToken", tokens.getAccessToken(),
-                (int) (JwtProvider.EXPIRE_ACCESS / 1000), false, "Lax");
+                (int) (JwtProvider.EXPIRE_ACCESS / 1000), COOKIE_SECURE, COOKIE_SAMESITE);
         cookieUtil.addCookie(response, "refreshToken", tokens.getRefreshToken(),
-                (int) (JwtProvider.EXPIRE_REFRESH / 1000), false, "Lax");
+                (int) (JwtProvider.EXPIRE_REFRESH / 1000), COOKIE_SECURE, COOKIE_SAMESITE);
 
         // 4. redirect
         getRedirectStrategy().sendRedirect(request, response, REDIRECT_URI);
