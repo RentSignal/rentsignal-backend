@@ -20,4 +20,18 @@ public class CookieUtil {
         response.addHeader("Set-Cookie", cookie);
     }
 
+    /** 쿠키 삭제 */
+    public void expireCookie(HttpServletResponse response,
+                             String name,
+                             boolean secure, String sameSite) {
+        String cookie = name + "="       // value는 의미 X
+                + "; Max-Age=0"
+                + "; Path=/"
+                + "; HttpOnly"
+                + (secure ? "; Secure" : "")
+                + "; SameSite=" + sameSite;
+
+        response.addHeader("Set-Cookie", cookie);
+    }
+
 }
