@@ -18,13 +18,20 @@ public class CommunityController {
     @GetMapping("/posts")
     public Page<PostListItemResponse> getPosts(
             @AuthenticationPrincipal CustomPrincipal user,
-            @RequestParam(required=false) String category,
-            @RequestParam(required=false) String keyword,
-            @RequestParam(defaultValue="latest") String sort,
-            @RequestParam(defaultValue="0") int page,
-            @RequestParam(defaultValue="20") int size
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "latest") String sort,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
     ){
-        return communityService.getPosts(user.getId(),category,keyword,sort,page,size);
+        return communityService.getPosts(user.getId(), category, keyword, sort, page, size);
+    }
+
+    @GetMapping("/posts/{postId}")
+    public PostDetailResponse getPostDetail(
+            @PathVariable Long postId
+    ){
+        return communityService.getPostDetail(postId);
     }
 
     @PostMapping("/posts")
@@ -32,7 +39,7 @@ public class CommunityController {
             @AuthenticationPrincipal CustomPrincipal user,
             @RequestBody PostCreateRequest request
     ){
-        return communityService.createPost(user.getId(),request);
+        return communityService.createPost(user.getId(), request);
     }
 
     @PostMapping("/posts/{postId}/comments")
@@ -41,7 +48,16 @@ public class CommunityController {
             @PathVariable Long postId,
             @RequestBody CommentCreateRequest request
     ){
-        return communityService.createComment(postId,user.getId(),request);
+        return communityService.createComment(postId, user.getId(), request);
+    }
+
+    @GetMapping("/posts/{postId}/comments")
+    public Page<CommentResponse> getComments(
+            @PathVariable Long postId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ){
+        return communityService.getComments(postId, page, size);
     }
 
     @PostMapping("/posts/{postId}/likes")
@@ -49,7 +65,7 @@ public class CommunityController {
             @AuthenticationPrincipal CustomPrincipal user,
             @PathVariable Long postId
     ){
-        communityService.likePost(postId,user.getId());
+        communityService.likePost(postId, user.getId());
     }
 
     @PostMapping("/comments/{commentId}/likes")
@@ -57,7 +73,7 @@ public class CommunityController {
             @AuthenticationPrincipal CustomPrincipal user,
             @PathVariable Long commentId
     ){
-        communityService.likeComment(commentId,user.getId());
+        communityService.likeComment(commentId, user.getId());
     }
 
 }

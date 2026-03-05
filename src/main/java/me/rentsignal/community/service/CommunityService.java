@@ -33,7 +33,6 @@ public class CommunityService {
         Pageable pageable = PageRequest.of(page, size, s);
 
         return postRepository.search(
-                //user.getNeighborhoodId(),
                 category,
                 keyword,
                 pageable
@@ -48,6 +47,27 @@ public class CommunityService {
         ));
     }
 
+    @Transactional(readOnly = true)
+    public PostDetailResponse getPostDetail(Long postId){
+
+        Post post = postRepository.findById(postId).orElseThrow();
+
+        post.setViewCount(post.getViewCount() + 1);
+
+        return new PostDetailResponse(
+                post.getId(),
+                post.getUserId(),
+                post.getCategory(),
+                post.getTitle(),
+                post.getContent(),
+                post.getViewCount(),
+                post.getLikeCount(),
+                post.getCommentCount(),
+                post.getCreatedAt(),
+                post.getUpdatedAt()
+        );
+    }
+
     @Transactional
     public Long createPost(Long userId, PostCreateRequest request) {
 
@@ -55,7 +75,6 @@ public class CommunityService {
 
         Post post = Post.builder()
                 .userId(userId)
-               // .neighborhoodId(user.getNeighborhoodId())
                 .category(request.getCategory())
                 .title(request.getTitle())
                 .content(request.getContent())
@@ -75,15 +94,30 @@ public class CommunityService {
                 .content(request.getContent())
                 .build();
 
-        post.setCommentCount(post.getCommentCount()+1);
+        post.setCommentCount(post.getCommentCount() + 1);
 
         return commentRepository.save(comment).getId();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<CommentResponse> getComments(Long postId, int page, int size){
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
+
+        return commentRepository
+                .findByPostIdAndIsDeletedFalse(postId, pageable)
+                .map(c -> new CommentResponse(
+                        c.getId(),
+                        c.getUserId(),
+                        c.getContent(),
+                        c.getCreatedAt()
+                ));
     }
 
     @Transactional
     public void likePost(Long postId, Long userId){
 
-        if(postLikeRepository.findByPostIdAndUserId(postId,userId).isPresent()){
+        if(postLikeRepository.findByPostIdAndUserId(postId, userId).isPresent()){
             throw new IllegalStateException("already liked");
         }
 
@@ -95,13 +129,13 @@ public class CommunityService {
         postLikeRepository.save(like);
 
         Post post = postRepository.findById(postId).orElseThrow();
-        post.setLikeCount(post.getLikeCount()+1);
+        post.setLikeCount(post.getLikeCount() + 1);
     }
 
     @Transactional
     public void likeComment(Long commentId, Long userId){
 
-        if(commentLikeRepository.findByCommentIdAndUserId(commentId,userId).isPresent()){
+        if(commentLikeRepository.findByCommentIdAndUserId(commentId, userId).isPresent()){
             throw new IllegalStateException("already liked");
         }
 
@@ -113,7 +147,7 @@ public class CommunityService {
         commentLikeRepository.save(like);
 
         Comment comment = commentRepository.findById(commentId).orElseThrow();
-        comment.setLikeCount(comment.getLikeCount()+1);
+        comment.setLikeCount(comment.getLikeCount() + 1);
     }
 
 }
