@@ -3,8 +3,11 @@ package me.rentsignal.community.controller;
 import lombok.RequiredArgsConstructor;
 import me.rentsignal.community.dto.*;
 import me.rentsignal.community.service.CommunityService;
+import me.rentsignal.global.response.BaseResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,77 +17,142 @@ public class CommunityController {
 
     private final CommunityService communityService;
 
-    // 게시글 목록 조회
+    // 게시글 목록
     @GetMapping("/posts")
-    public Page<PostListItemResponse> getPosts(
+    public ResponseEntity<BaseResponse<Page<PostListItemResponse>>> getPosts(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String keyword,
             Pageable pageable
     ) {
-        return communityService.getPosts(category, keyword, pageable);
+
+        Page<PostListItemResponse> result =
+                communityService.getPosts(category, keyword, pageable);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(BaseResponse.success(result));
     }
 
-    // 게시글 상세 조회
+    // 게시글 상세
     @GetMapping("/posts/{postId}")
-    public PostDetailResponse getPostDetail(@PathVariable Long postId) {
-        return communityService.getPostDetail(postId);
+    public ResponseEntity<BaseResponse<PostDetailResponse>> getPostDetail(
+            @PathVariable Long postId
+    ) {
+
+        PostDetailResponse result =
+                communityService.getPostDetail(postId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(BaseResponse.success(result));
     }
 
     // 게시글 작성
     @PostMapping("/posts")
-    public Long createPost(@RequestBody PostCreateRequest request) {
-        return communityService.createPost(request);
+    public ResponseEntity<BaseResponse<Long>> createPost(
+            @RequestBody PostCreateRequest request
+    ) {
+
+        Long postId = communityService.createPost(request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(BaseResponse.success("게시글 작성 성공", postId));
     }
 
     // 댓글 작성
     @PostMapping("/posts/{postId}/comments")
-    public Long createComment(
+    public ResponseEntity<BaseResponse<Long>> createComment(
             @PathVariable Long postId,
             @RequestBody CommentCreateRequest request
     ) {
-        return communityService.createComment(postId, request);
+
+        Long commentId =
+                communityService.createComment(postId, request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(BaseResponse.success("댓글 작성 성공", commentId));
     }
 
-    // 댓글 목록 조회
+    // 댓글 목록
     @GetMapping("/posts/{postId}/comments")
-    public Page<CommentResponse> getComments(
+    public ResponseEntity<BaseResponse<Page<CommentResponse>>> getComments(
             @PathVariable Long postId,
             Pageable pageable
     ) {
-        return communityService.getComments(postId, pageable);
+
+        Page<CommentResponse> result =
+                communityService.getComments(postId, pageable);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(BaseResponse.success(result));
     }
 
-    // 게시글 좋아요 토글
+    // 게시글 좋아요
     @PostMapping("/posts/{postId}/likes")
-    public void togglePostLike(@PathVariable Long postId) {
-        Long userId = 1L; // 테스트용
-        communityService.togglePostLike(postId, userId);
+    public ResponseEntity<BaseResponse<Void>> togglePostLike(
+            @PathVariable Long postId
+    ) {
+
+        communityService.togglePostLike(postId, 1L);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(BaseResponse.success("좋아요 처리 완료", null));
     }
 
-    // 댓글 좋아요 토글
+    // 댓글 좋아요
     @PostMapping("/comments/{commentId}/likes")
-    public void toggleCommentLike(@PathVariable Long commentId) {
-        Long userId = 1L; // 테스트용
-        communityService.toggleCommentLike(commentId, userId);
+    public ResponseEntity<BaseResponse<Void>> toggleCommentLike(
+            @PathVariable Long commentId
+    ) {
+
+        communityService.toggleCommentLike(commentId, 1L);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(BaseResponse.success("좋아요 처리 완료", null));
     }
+
     // 게시글 수정
     @PatchMapping("/posts/{postId}")
-    public void updatePost(
+    public ResponseEntity<BaseResponse<Void>> updatePost(
             @PathVariable Long postId,
             @RequestBody PostUpdateRequest request
     ) {
+
         communityService.updatePost(postId, request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(BaseResponse.success("게시글 수정 완료", null));
     }
 
     // 게시글 삭제
     @DeleteMapping("/posts/{postId}")
-    public void deletePost(@PathVariable Long postId) {
+    public ResponseEntity<BaseResponse<Void>> deletePost(
+            @PathVariable Long postId
+    ) {
+
         communityService.deletePost(postId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(BaseResponse.success("게시글 삭제 완료", null));
     }
 
     // 댓글 삭제
     @DeleteMapping("/comments/{commentId}")
-    public void deleteComment(@PathVariable Long commentId) {
+    public ResponseEntity<BaseResponse<Void>> deleteComment(
+            @PathVariable Long commentId
+    ) {
+
         communityService.deleteComment(commentId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(BaseResponse.success("댓글 삭제 완료", null));
     }
 }
