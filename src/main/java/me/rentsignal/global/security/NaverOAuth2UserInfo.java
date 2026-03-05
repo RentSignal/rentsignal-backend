@@ -49,4 +49,12 @@ public class NaverOAuth2UserInfo implements OAuth2UserInfo {
         return name == null ? null : name.toString();
     }
 
+    @Override
+    public String getImageUrl() {
+        Object profileImage = response.get("profile_image");
+        if (profileImage != null && !profileImage.toString().isBlank())
+            return profileImage.toString();
+        return null;
+    }
+
 }

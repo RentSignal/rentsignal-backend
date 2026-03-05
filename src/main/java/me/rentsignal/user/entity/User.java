@@ -30,6 +30,9 @@ public class User extends BaseTimeEntity {
     )
     private String phone;
 
+    @Column(nullable = false)
+    private String imageUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role = Role.ROLE_GUEST;
@@ -41,10 +44,11 @@ public class User extends BaseTimeEntity {
     private List<UserSocialAccount> socialAccounts = new ArrayList<>();
 
     @Builder
-    public User(String name, String phone, Role role) {
+    public User(String name, String phone, Role role, String imageUrl) {
         this.name = name;
         this.phone = phone;
         this.role = (role == null) ? Role.ROLE_GUEST : role;
+        this.imageUrl = imageUrl;
     }
 
     public void registerPhone(String phone) {
