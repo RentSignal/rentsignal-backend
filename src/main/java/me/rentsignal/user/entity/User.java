@@ -79,4 +79,12 @@ public class User extends BaseTimeEntity {
         newUser.addSocialAccount(socialAccount);
     }
 
+    public void updateName(String newName) {
+        this.name = newName;
+    }
+
+    public void updateImageUrl(String newImageUrl) {
+        this.imageUrl = newImageUrl;
+    }
+
 }
