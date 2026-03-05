@@ -4,11 +4,12 @@ import lombok.RequiredArgsConstructor;
 import me.rentsignal.community.domain.*;
 import me.rentsignal.community.dto.*;
 import me.rentsignal.community.repository.*;
-import me.rentsignal.user.entity.User;
-import me.rentsignal.user.repository.UserRepository;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,136 +19,126 @@ public class CommunityService {
     private final CommentRepository commentRepository;
     private final PostLikeRepository postLikeRepository;
     private final CommentLikeRepository commentLikeRepository;
-    private final UserRepository userRepository;
 
+    // 게시글 목록 조회
     @Transactional(readOnly = true)
-    public Page<PostListItemResponse> getPosts(Long userId, String category, String keyword, String sort, int page, int size) {
-
-        User user = userRepository.findById(userId).orElseThrow();
-
-        Sort s = "popular".equalsIgnoreCase(sort)
-                ? Sort.by(Sort.Direction.DESC, "likeCount")
-                .and(Sort.by(Sort.Direction.DESC, "createdAt"))
-                : Sort.by(Sort.Direction.DESC, "createdAt");
-
-        Pageable pageable = PageRequest.of(page, size, s);
-
-        return postRepository.search(
-                category,
-                keyword,
-                pageable
-        ).map(p -> new PostListItemResponse(
-                p.getId(),
-                p.getCategory(),
-                p.getTitle(),
-                p.getViewCount(),
-                p.getLikeCount(),
-                p.getCommentCount(),
-                p.getCreatedAt()
-        ));
+    public Page<PostListItemResponse> getPosts(
+            String category,
+            String keyword,
+            Pageable pageable
+    ) {
+        return postRepository.search(category, keyword, pageable)
+                .map(PostListItemResponse::from);
     }
 
-    @Transactional(readOnly = true)
-    public PostDetailResponse getPostDetail(Long postId){
+    // 게시글 상세 조회
+    @Transactional
+    public PostDetailResponse getPostDetail(Long postId) {
 
-        Post post = postRepository.findById(postId).orElseThrow();
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("post not found"));
 
         post.setViewCount(post.getViewCount() + 1);
 
-        return new PostDetailResponse(
-                post.getId(),
-                post.getUserId(),
-                post.getCategory(),
-                post.getTitle(),
-                post.getContent(),
-                post.getViewCount(),
-                post.getLikeCount(),
-                post.getCommentCount(),
-                post.getCreatedAt(),
-                post.getUpdatedAt()
-        );
+        return PostDetailResponse.from(post);
     }
 
+    // 게시글 작성
     @Transactional
-    public Long createPost(Long userId, PostCreateRequest request) {
-
-        User user = userRepository.findById(userId).orElseThrow();
+    public Long createPost(PostCreateRequest request) {
 
         Post post = Post.builder()
-                .userId(userId)
-                .category(request.getCategory())
                 .title(request.getTitle())
                 .content(request.getContent())
+                .category(request.getCategory())
+                .userId(1L) // 테스트용
                 .build();
 
-        return postRepository.save(post).getId();
+        postRepository.save(post);
+
+        return post.getId();
     }
 
+    // 댓글 작성
     @Transactional
-    public Long createComment(Long postId, Long userId, CommentCreateRequest request) {
+    public Long createComment(Long postId, CommentCreateRequest request) {
 
-        Post post = postRepository.findById(postId).orElseThrow();
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("post not found"));
 
         Comment comment = Comment.builder()
                 .postId(postId)
-                .userId(userId)
+                .userId(1L) // 테스트용
                 .content(request.getContent())
                 .build();
 
+        commentRepository.save(comment);
+
         post.setCommentCount(post.getCommentCount() + 1);
 
-        return commentRepository.save(comment).getId();
+        return comment.getId();
     }
 
+    // 댓글 목록 조회
     @Transactional(readOnly = true)
-    public Page<CommentResponse> getComments(Long postId, int page, int size){
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
+    public Page<CommentResponse> getComments(Long postId, Pageable pageable) {
 
         return commentRepository
                 .findByPostIdAndIsDeletedFalse(postId, pageable)
-                .map(c -> new CommentResponse(
-                        c.getId(),
-                        c.getUserId(),
-                        c.getContent(),
-                        c.getCreatedAt()
-                ));
+                .map(CommentResponse::from);
     }
 
+    // 게시글 좋아요 토글
     @Transactional
-    public void likePost(Long postId, Long userId){
+    public void togglePostLike(Long postId, Long userId) {
 
-        if(postLikeRepository.findByPostIdAndUserId(postId, userId).isPresent()){
-            throw new IllegalStateException("already liked");
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("post not found"));
+
+        Optional<PostLike> like =
+                postLikeRepository.findByPostIdAndUserId(postId, userId);
+
+        if (like.isPresent()) {
+
+            postLikeRepository.delete(like.get());
+            post.setLikeCount(post.getLikeCount() - 1);
+
+        } else {
+
+            PostLike postLike = PostLike.builder()
+                    .postId(postId)
+                    .userId(userId)
+                    .build();
+
+            postLikeRepository.save(postLike);
+            post.setLikeCount(post.getLikeCount() + 1);
         }
-
-        PostLike like = PostLike.builder()
-                .postId(postId)
-                .userId(userId)
-                .build();
-
-        postLikeRepository.save(like);
-
-        Post post = postRepository.findById(postId).orElseThrow();
-        post.setLikeCount(post.getLikeCount() + 1);
     }
 
+    // 댓글 좋아요 토글
     @Transactional
-    public void likeComment(Long commentId, Long userId){
+    public void toggleCommentLike(Long commentId, Long userId) {
 
-        if(commentLikeRepository.findByCommentIdAndUserId(commentId, userId).isPresent()){
-            throw new IllegalStateException("already liked");
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("comment not found"));
+
+        Optional<CommentLike> like =
+                commentLikeRepository.findByCommentIdAndUserId(commentId, userId);
+
+        if (like.isPresent()) {
+
+            commentLikeRepository.delete(like.get());
+            comment.setLikeCount(comment.getLikeCount() - 1);
+
+        } else {
+
+            CommentLike commentLike = CommentLike.builder()
+                    .commentId(commentId)
+                    .userId(userId)
+                    .build();
+
+            commentLikeRepository.save(commentLike);
+            comment.setLikeCount(comment.getLikeCount() + 1);
         }
-
-        CommentLike like = CommentLike.builder()
-                .commentId(commentId)
-                .userId(userId)
-                .build();
-
-        commentLikeRepository.save(like);
-
-        Comment comment = commentRepository.findById(commentId).orElseThrow();
-        comment.setLikeCount(comment.getLikeCount() + 1);
     }
-
 }

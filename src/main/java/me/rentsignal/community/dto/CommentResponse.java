@@ -1,17 +1,26 @@
 package me.rentsignal.community.dto;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-
-import java.time.LocalDateTime;
+import me.rentsignal.community.domain.Comment;
 
 @Getter
-@AllArgsConstructor
+@Builder
 public class CommentResponse {
 
     private Long id;
+    private Long postId;
     private Long userId;
     private String content;
-    private LocalDateTime createdAt;
+    private Integer likeCount;
 
+    public static CommentResponse from(Comment comment) {
+        return CommentResponse.builder()
+                .id(comment.getId())
+                .postId(comment.getPostId())
+                .userId(comment.getUserId())
+                .content(comment.getContent())
+                .likeCount(comment.getLikeCount())
+                .build();
+    }
 }

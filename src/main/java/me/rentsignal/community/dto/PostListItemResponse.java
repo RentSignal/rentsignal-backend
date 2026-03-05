@@ -1,20 +1,30 @@
 package me.rentsignal.community.dto;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-
-import java.time.LocalDateTime;
+import me.rentsignal.community.domain.Post;
 
 @Getter
-@AllArgsConstructor
+@Builder
 public class PostListItemResponse {
 
     private Long id;
-    private String category;
     private String title;
-    private Integer viewCount;
+    private String category;
+    private Long userId;
     private Integer likeCount;
     private Integer commentCount;
-    private LocalDateTime createdAt;
+    private Integer viewCount;
 
+    public static PostListItemResponse from(Post post) {
+        return PostListItemResponse.builder()
+                .id(post.getId())
+                .title(post.getTitle())
+                .category(post.getCategory())
+                .userId(post.getUserId())
+                .likeCount(post.getLikeCount())
+                .commentCount(post.getCommentCount())
+                .viewCount(post.getViewCount())
+                .build();
+    }
 }
