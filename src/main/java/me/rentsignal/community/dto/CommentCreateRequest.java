@@ -5,10 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PostCreateRequest {
+public class CommentCreateRequest {
 
-    private String category;
-    private String title;
     private String content;
 
 }

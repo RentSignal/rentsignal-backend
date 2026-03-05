@@ -1,10 +1,17 @@
 package me.rentsignal.community.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 import java.time.LocalDateTime;
 
-public record CommentResponse(
-        Long id,
-        Long userId,
-        String content,
-        LocalDateTime createdAt
-) {}
+@Getter
+@AllArgsConstructor
+public class CommentResponse {
+
+    private Long id;
+    private Long userId;
+    private String content;
+    private LocalDateTime createdAt;
+
+}

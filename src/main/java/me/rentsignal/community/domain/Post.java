@@ -1,51 +1,58 @@
 package me.rentsignal.community.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "posts")
 @Getter
+@Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class Post {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="user_id", nullable=false)
     private Long userId;
 
-    @Column(name="neighborhood_id", nullable=false)
-    private Long neighborhoodId;
+    //private Long neighborhoodId;
 
-    @Column(nullable=false, length=30)
     private String category;
 
-    @Column(nullable=false, length=150)
     private String title;
 
-    @Lob
-    @Column(nullable=false)
+    @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Column(name="view_count", nullable=false)
-    private int viewCount;
+    private Integer viewCount;
 
-    @Column(name="like_count", nullable=false)
-    private int likeCount;
+    private Integer likeCount;
 
-    @Column(name="comment_count", nullable=false)
-    private int commentCount;
+    private Integer commentCount;
 
-    @Column(name="is_deleted", nullable=false)
-    private boolean isDeleted;
+    private Boolean isDeleted;
 
-    @Column(name="created_at", nullable=false)
     private LocalDateTime createdAt;
 
-    @Column(name="updated_at", nullable=false)
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+        viewCount = 0;
+        likeCount = 0;
+        commentCount = 0;
+        isDeleted = false;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

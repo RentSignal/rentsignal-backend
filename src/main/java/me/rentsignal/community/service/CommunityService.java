@@ -1,36 +1,41 @@
 package me.rentsignal.community.service;
 
+import lombok.RequiredArgsConstructor;
 import me.rentsignal.community.domain.*;
 import me.rentsignal.community.dto.*;
 import me.rentsignal.community.repository.*;
+import me.rentsignal.user.entity.User;
+import me.rentsignal.user.repository.UserRepository;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class CommunityService {
 
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
+    private final PostLikeRepository postLikeRepository;
+    private final CommentLikeRepository commentLikeRepository;
+    private final UserRepository userRepository;
 
-    public CommunityService(PostRepository postRepository, CommentRepository commentRepository) {
-        this.postRepository = postRepository;
-        this.commentRepository = commentRepository;
-    }
-
-    // 게시글 목록 조회
     @Transactional(readOnly = true)
-    public Page<PostListItemResponse> getPosts(String category, String keyword, String sort, int page, int size) {
+    public Page<PostListItemResponse> getPosts(Long userId, String category, String keyword, String sort, int page, int size) {
+
+        User user = userRepository.findById(userId).orElseThrow();
 
         Sort s = "popular".equalsIgnoreCase(sort)
-                ? Sort.by(Sort.Direction.DESC, "likeCount").and(Sort.by(Sort.Direction.DESC, "createdAt"))
+                ? Sort.by(Sort.Direction.DESC, "likeCount")
+                .and(Sort.by(Sort.Direction.DESC, "createdAt"))
                 : Sort.by(Sort.Direction.DESC, "createdAt");
 
         Pageable pageable = PageRequest.of(page, size, s);
 
         return postRepository.search(
-                emptyToNull(category),
-                emptyToNull(keyword),
+                //user.getNeighborhoodId(),
+                category,
+                keyword,
                 pageable
         ).map(p -> new PostListItemResponse(
                 p.getId(),
@@ -43,65 +48,72 @@ public class CommunityService {
         ));
     }
 
-    // 게시글 상세 조회
-    @Transactional(readOnly = true)
-    public PostDetailResponse getPostDetail(Long postId) {
-        Post p = postRepository.findById(postId)
-                .filter(post -> !post.isDeleted())
-                .orElseThrow(() -> new IllegalArgumentException("post not found: " + postId));
-
-        return new PostDetailResponse(
-                p.getId(),
-                p.getUserId(),
-                p.getNeighborhoodId(),
-                p.getCategory(),
-                p.getTitle(),
-                p.getContent(),
-                p.getViewCount(),
-                p.getLikeCount(),
-                p.getCommentCount(),
-                p.getCreatedAt(),
-                p.getUpdatedAt()
-        );
-    }
-
-    // 댓글 조회
-    @Transactional(readOnly = true)
-    public Page<CommentResponse> getComments(Long postId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
-        return commentRepository.findByPostIdAndIsDeletedFalse(postId, pageable)
-                .map(c -> new CommentResponse(
-                        c.getId(),
-                        c.getUserId(),
-                        c.getContent(),
-                        c.getCreatedAt()
-                ));
-    }
-
-    //  게시글 작성
     @Transactional
-    public Long createPost(PostCreateRequest request) {
+    public Long createPost(Long userId, PostCreateRequest request) {
+
+        User user = userRepository.findById(userId).orElseThrow();
 
         Post post = Post.builder()
-                .userId(request.getUserId())
-                .neighborhoodId(request.getNeighborhoodId())
+                .userId(userId)
+               // .neighborhoodId(user.getNeighborhoodId())
                 .category(request.getCategory())
                 .title(request.getTitle())
                 .content(request.getContent())
-                .viewCount(0)
-                .likeCount(0)
-                .commentCount(0)
-                .isDeleted(false)
                 .build();
 
-        Post saved = postRepository.save(post);
-
-        return saved.getId();
+        return postRepository.save(post).getId();
     }
 
-    private String emptyToNull(String v) {
-        if (v == null) return null;
-        String t = v.trim();
-        return t.isEmpty() ? null : t;
+    @Transactional
+    public Long createComment(Long postId, Long userId, CommentCreateRequest request) {
+
+        Post post = postRepository.findById(postId).orElseThrow();
+
+        Comment comment = Comment.builder()
+                .postId(postId)
+                .userId(userId)
+                .content(request.getContent())
+                .build();
+
+        post.setCommentCount(post.getCommentCount()+1);
+
+        return commentRepository.save(comment).getId();
     }
+
+    @Transactional
+    public void likePost(Long postId, Long userId){
+
+        if(postLikeRepository.findByPostIdAndUserId(postId,userId).isPresent()){
+            throw new IllegalStateException("already liked");
+        }
+
+        PostLike like = PostLike.builder()
+                .postId(postId)
+                .userId(userId)
+                .build();
+
+        postLikeRepository.save(like);
+
+        Post post = postRepository.findById(postId).orElseThrow();
+        post.setLikeCount(post.getLikeCount()+1);
+    }
+
+    @Transactional
+    public void likeComment(Long commentId, Long userId){
+
+        if(commentLikeRepository.findByCommentIdAndUserId(commentId,userId).isPresent()){
+            throw new IllegalStateException("already liked");
+        }
+
+        CommentLike like = CommentLike.builder()
+                .commentId(commentId)
+                .userId(userId)
+                .build();
+
+        commentLikeRepository.save(like);
+
+        Comment comment = commentRepository.findById(commentId).orElseThrow();
+        comment.setLikeCount(comment.getLikeCount()+1);
+    }
+
 }

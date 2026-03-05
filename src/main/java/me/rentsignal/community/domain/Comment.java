@@ -1,36 +1,40 @@
 package me.rentsignal.community.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "comments")
 @Getter
+@Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="user_id", nullable=false)
-    private Long userId;
-
-    @Column(name="post_id", nullable=false)
     private Long postId;
 
-    @Lob
-    @Column(nullable=false)
+    private Long userId;
+
+    @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Column(name="is_deleted", nullable=false)
-    private boolean isDeleted;
+    private Integer likeCount;
 
-    @Column(name="created_at", nullable=false)
+    private Boolean isDeleted;
+
     private LocalDateTime createdAt;
 
-    @Column(name="updated_at", nullable=false)
-    private LocalDateTime updatedAt;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        likeCount = 0;
+        isDeleted = false;
+    }
 }

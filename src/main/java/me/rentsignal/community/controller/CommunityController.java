@@ -1,51 +1,63 @@
 package me.rentsignal.community.controller;
 
+import lombok.RequiredArgsConstructor;
 import me.rentsignal.community.dto.*;
 import me.rentsignal.community.service.CommunityService;
+import me.rentsignal.global.security.CustomPrincipal;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/community")
+@RequiredArgsConstructor
 public class CommunityController {
 
     private final CommunityService communityService;
 
-    public CommunityController(CommunityService communityService) {
-        this.communityService = communityService;
-    }
-
-    // 게시글 목록
     @GetMapping("/posts")
     public Page<PostListItemResponse> getPosts(
-            @RequestParam(required = false) String categoryId,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = "latest") String sort,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
-    ) {
-        return communityService.getPosts(categoryId, keyword, sort, page, size);
+            @AuthenticationPrincipal CustomPrincipal user,
+            @RequestParam(required=false) String category,
+            @RequestParam(required=false) String keyword,
+            @RequestParam(defaultValue="latest") String sort,
+            @RequestParam(defaultValue="0") int page,
+            @RequestParam(defaultValue="20") int size
+    ){
+        return communityService.getPosts(user.getId(),category,keyword,sort,page,size);
     }
 
-    // 게시글 상세
-    @GetMapping("/posts/{postId}")
-    public PostDetailResponse getPostDetail(@PathVariable Long postId) {
-        return communityService.getPostDetail(postId);
-    }
-
-    // 댓글 조회
-    @GetMapping("/posts/{postId}/comments")
-    public Page<CommentResponse> getComments(
-            @PathVariable Long postId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "50") int size
-    ) {
-        return communityService.getComments(postId, page, size);
-    }
-
-    //  게시글 작성
     @PostMapping("/posts")
-    public Long createPost(@RequestBody PostCreateRequest request) {
-        return communityService.createPost(request);
+    public Long createPost(
+            @AuthenticationPrincipal CustomPrincipal user,
+            @RequestBody PostCreateRequest request
+    ){
+        return communityService.createPost(user.getId(),request);
     }
+
+    @PostMapping("/posts/{postId}/comments")
+    public Long createComment(
+            @AuthenticationPrincipal CustomPrincipal user,
+            @PathVariable Long postId,
+            @RequestBody CommentCreateRequest request
+    ){
+        return communityService.createComment(postId,user.getId(),request);
+    }
+
+    @PostMapping("/posts/{postId}/likes")
+    public void likePost(
+            @AuthenticationPrincipal CustomPrincipal user,
+            @PathVariable Long postId
+    ){
+        communityService.likePost(postId,user.getId());
+    }
+
+    @PostMapping("/comments/{commentId}/likes")
+    public void likeComment(
+            @AuthenticationPrincipal CustomPrincipal user,
+            @PathVariable Long commentId
+    ){
+        communityService.likeComment(commentId,user.getId());
+    }
+
 }
