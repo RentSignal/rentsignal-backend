@@ -6,49 +6,64 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "posts")
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Table(name = "posts")
 public class Post {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // 작성자
+    @Column(nullable = false)
     private Long userId;
 
-    //private Long neighborhoodId;
-
-    private String category;
-
+    // 제목
+    @Column(nullable = false)
     private String title;
 
+    // 내용
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    private Integer viewCount;
+    // 카테고리
+    @Column(nullable = false)
+    private String category;
 
-    private Integer likeCount;
+    // 좋아요 수
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer likeCount = 0;
 
-    private Integer commentCount;
+    // 조회수
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer viewCount = 0;
 
-    private Boolean isDeleted;
+    // 댓글 수
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer commentCount = 0;
 
+    // 삭제 여부
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean isDeleted = false;
+
+    // 생성 시간
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    // 수정 시간
     private LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-        viewCount = 0;
-        likeCount = 0;
-        commentCount = 0;
-        isDeleted = false;
     }
 
     @PreUpdate

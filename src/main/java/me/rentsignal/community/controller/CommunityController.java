@@ -55,17 +55,36 @@ public class CommunityController {
     }
 
     // 게시글 좋아요 토글
-    @PostMapping("/posts/{postId}/like")
+    @PostMapping("/posts/{postId}/likes")
     public void togglePostLike(@PathVariable Long postId) {
         Long userId = 1L; // 테스트용
         communityService.togglePostLike(postId, userId);
     }
 
     // 댓글 좋아요 토글
-    @PostMapping("/comments/{commentId}/like")
+    @PostMapping("/comments/{commentId}/likes")
     public void toggleCommentLike(@PathVariable Long commentId) {
         Long userId = 1L; // 테스트용
         communityService.toggleCommentLike(commentId, userId);
     }
+    // 게시글 수정
+    @PatchMapping("/posts/{postId}")
+    public void updatePost(
+            @PathVariable Long postId,
+            @RequestBody PostUpdateRequest request
+    ) {
+        communityService.updatePost(postId, request);
+    }
 
+    // 게시글 삭제
+    @DeleteMapping("/posts/{postId}")
+    public void deletePost(@PathVariable Long postId) {
+        communityService.deletePost(postId);
+    }
+
+    // 댓글 삭제
+    @DeleteMapping("/comments/{commentId}")
+    public void deleteComment(@PathVariable Long commentId) {
+        communityService.deleteComment(commentId);
+    }
 }

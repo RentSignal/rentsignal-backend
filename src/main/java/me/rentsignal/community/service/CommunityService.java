@@ -141,4 +141,39 @@ public class CommunityService {
             comment.setLikeCount(comment.getLikeCount() + 1);
         }
     }
+    // 게시글 수정
+    @Transactional
+    public void updatePost(Long postId, PostUpdateRequest request) {
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("post not found"));
+
+        post.setTitle(request.getTitle());
+        post.setContent(request.getContent());
+    }
+
+    // 게시글 삭제
+    @Transactional
+    public void deletePost(Long postId) {
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("post not found"));
+
+        post.setIsDeleted(true);
+    }
+
+    // 댓글 삭제
+    @Transactional
+    public void deleteComment(Long commentId) {
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("comment not found"));
+
+        comment.setIsDeleted(true);
+
+        Post post = postRepository.findById(comment.getPostId())
+                .orElseThrow(() -> new IllegalArgumentException("post not found"));
+
+        post.setCommentCount(post.getCommentCount() - 1);
+    }
 }
