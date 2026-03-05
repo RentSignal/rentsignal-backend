@@ -38,6 +38,10 @@ public class CommunityService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("post not found"));
 
+        if (post.getIsDeleted()) {
+            throw new IllegalArgumentException("post not found");
+        }
+
         post.setViewCount(post.getViewCount() + 1);
 
         return PostDetailResponse.from(post);
