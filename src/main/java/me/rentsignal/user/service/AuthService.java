@@ -8,6 +8,7 @@ import me.rentsignal.global.security.CookieUtil;
 import me.rentsignal.user.entity.User;
 import me.rentsignal.user.repository.RefreshTokenRepository;
 import me.rentsignal.user.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,12 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
+    @Value("${COOKIE_SECURE}")
+    private boolean COOKIE_SECURE;
+
+    @Value("${COOKIE_SAMESITE}")
+    private String COOKIE_SAMESITE;
 
     private final UserRepository userRepository;
     private final CookieUtil cookieUtil;
@@ -47,9 +54,8 @@ public class AuthService {
         }
 
         // 쿠키 삭제
-        // TODO : 배포 시 Secure = true, SameSite = None으로 설정
-        cookieUtil.expireCookie(response, "accessToken", false, "Lax");
-        cookieUtil.expireCookie(response, "refreshToken", false, "Lax");
+        cookieUtil.expireCookie(response, "accessToken", COOKIE_SECURE, COOKIE_SAMESITE);
+        cookieUtil.expireCookie(response, "refreshToken", COOKIE_SECURE, COOKIE_SAMESITE);
     }
 
 }
