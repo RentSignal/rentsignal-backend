@@ -2,58 +2,49 @@ package me.rentsignal.community.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDateTime;
+import me.rentsignal.global.entity.BaseTimeEntity;
+import me.rentsignal.user.entity.User;
+import org.hibernate.annotations.Where;
 
 @Entity
 @Getter
-@Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@Table(name = "comments")
-public class Comment {
+@Where(clause = "is_deleted = false")
+public class Comment extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 게시글 id
-    @Column(nullable = false)
-    private Long postId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id")
+    private Post post;
 
-    // 작성자
-    @Column(nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    // 댓글 내용
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    // 좋아요 수
-    @Column(nullable = false)
     @Builder.Default
     private Integer likeCount = 0;
 
-    // 삭제 여부
-    @Column(nullable = false)
     @Builder.Default
+    @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 
-    // 생성 시간
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
-    // 수정 시간
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
+    public void increaseLikeCount() {
+        this.likeCount++;
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+    public void decreaseLikeCount() {
+        if (this.likeCount > 0) this.likeCount--;
+    }
+
+    public void softDelete() {
+        this.isDeleted = true;
     }
 }

@@ -2,72 +2,72 @@ package me.rentsignal.community.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDateTime;
+import me.rentsignal.global.entity.BaseTimeEntity;
+import me.rentsignal.user.entity.User;
+import org.hibernate.annotations.Where;
 
 @Entity
 @Getter
-@Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@Table(name = "posts")
-public class Post {
+@Where(clause = "is_deleted = false")
+public class Post extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 작성자
-    @Column(nullable = false)
-    private Long userId;
-
-    // 제목
-    @Column(nullable = false)
     private String title;
 
-    // 내용
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    // 카테고리
-    @Column(nullable = false)
     private String category;
 
-    // 좋아요 수
-    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @Builder.Default
     private Integer likeCount = 0;
 
-    // 조회수
-    @Column(nullable = false)
     @Builder.Default
     private Integer viewCount = 0;
 
-    // 댓글 수
-    @Column(nullable = false)
     @Builder.Default
     private Integer commentCount = 0;
 
-    // 삭제 여부
-    @Column(nullable = false)
     @Builder.Default
+    @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 
-    // 생성 시간
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
-    // 수정 시간
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
+    public void increaseViewCount() {
+        this.viewCount++;
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+    public void increaseCommentCount() {
+        this.commentCount++;
+    }
+
+    public void decreaseCommentCount() {
+        if (this.commentCount > 0) this.commentCount--;
+    }
+
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    public void decreaseLikeCount() {
+        if (this.likeCount > 0) this.likeCount--;
+    }
+
+    public void update(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
+
+    public void softDelete() {
+        this.isDeleted = true;
     }
 }

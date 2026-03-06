@@ -17,8 +17,8 @@ public class CommentResponse {
     public static CommentResponse from(Comment comment) {
         return CommentResponse.builder()
                 .id(comment.getId())
-                .postId(comment.getPostId())
-                .userId(comment.getUserId())
+                .postId(comment.getPost().getId())   //  수정
+                .userId(comment.getUser().getId())   //  수정
                 .content(comment.getContent())
                 .likeCount(comment.getLikeCount())
                 .build();
