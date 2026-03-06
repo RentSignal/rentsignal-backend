@@ -50,6 +50,29 @@ public class CommunityController {
         return BaseResponse.success(postId);
     }
 
+    // 게시글 수정
+    @PatchMapping("/posts/{postId}")
+    public BaseResponse<Void> updatePost(
+            @PathVariable Long postId,
+            @RequestBody PostUpdateRequest request
+    ) {
+
+        communityService.updatePost(postId, request);
+
+        return BaseResponse.success(null);
+    }
+
+    // 게시글 삭제 (soft delete)
+    @DeleteMapping("/posts/{postId}")
+    public BaseResponse<Void> deletePost(
+            @PathVariable Long postId
+    ) {
+
+        communityService.deletePost(postId);
+
+        return BaseResponse.success(null);
+    }
+
     // 댓글 작성
     @PostMapping("/posts/{postId}/comments")
     public BaseResponse<Long> createComment(
@@ -63,7 +86,7 @@ public class CommunityController {
         return BaseResponse.success(commentId);
     }
 
-    // 댓글 조회
+    // 댓글 목록 조회
     @GetMapping("/posts/{postId}/comments")
     public BaseResponse<Page<CommentResponse>> getComments(
             @PathVariable Long postId,
@@ -75,8 +98,19 @@ public class CommunityController {
         );
     }
 
+    // 댓글 삭제 (soft delete)
+    @DeleteMapping("/comments/{commentId}")
+    public BaseResponse<Void> deleteComment(
+            @PathVariable Long commentId
+    ) {
+
+        communityService.deleteComment(commentId);
+
+        return BaseResponse.success(null);
+    }
+
     // 게시글 좋아요
-    @PostMapping("/posts/{postId}/like")
+    @PostMapping("/posts/{postId}/likes")
     public BaseResponse<Void> togglePostLike(
             @PathVariable Long postId
     ) {
@@ -87,7 +121,7 @@ public class CommunityController {
     }
 
     // 댓글 좋아요
-    @PostMapping("/comments/{commentId}/like")
+    @PostMapping("/comments/{commentId}/likes")
     public BaseResponse<Void> toggleCommentLike(
             @PathVariable Long commentId
     ) {
