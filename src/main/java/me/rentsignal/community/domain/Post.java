@@ -3,6 +3,7 @@ package me.rentsignal.community.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import me.rentsignal.global.entity.BaseTimeEntity;
+import me.rentsignal.user.entity.User;
 import org.hibernate.annotations.Where;
 
 @Entity
@@ -10,7 +11,7 @@ import org.hibernate.annotations.Where;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Where(clause = "is_deleted = false") //  soft delete 자동 필터
+@Where(clause = "is_deleted = false")
 public class Post extends BaseTimeEntity {
 
     @Id
@@ -24,9 +25,9 @@ public class Post extends BaseTimeEntity {
 
     private String category;
 
-    private Long userId;
-
-    // neighborhoodId 아직 구현 전
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Builder.Default
     private Integer likeCount = 0;
@@ -42,25 +43,23 @@ public class Post extends BaseTimeEntity {
     private Boolean isDeleted = false;
 
     public void increaseViewCount() {
-        this.viewCount = (this.viewCount == null) ? 1 : this.viewCount + 1;
+        this.viewCount++;
     }
 
     public void increaseCommentCount() {
-        this.commentCount = (this.commentCount == null) ? 1 : this.commentCount + 1;
+        this.commentCount++;
     }
 
     public void decreaseCommentCount() {
-        if (this.commentCount == null || this.commentCount <= 0) return;
-        this.commentCount = this.commentCount - 1;
+        if (this.commentCount > 0) this.commentCount--;
     }
 
     public void increaseLikeCount() {
-        this.likeCount = (this.likeCount == null) ? 1 : this.likeCount + 1;
+        this.likeCount++;
     }
 
     public void decreaseLikeCount() {
-        if (this.likeCount == null || this.likeCount <= 0) return;
-        this.likeCount = this.likeCount - 1;
+        if (this.likeCount > 0) this.likeCount--;
     }
 
     public void update(String title, String content) {

@@ -3,6 +3,7 @@ package me.rentsignal.community.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import me.rentsignal.global.entity.BaseTimeEntity;
+import me.rentsignal.user.entity.User;
 import org.hibernate.annotations.Where;
 
 @Entity
@@ -10,16 +11,20 @@ import org.hibernate.annotations.Where;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Where(clause = "is_deleted = false") // ✅ soft delete
+@Where(clause = "is_deleted = false")
 public class Comment extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long postId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id")
+    private Post post;
 
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Column(columnDefinition = "TEXT")
     private String content;
@@ -32,12 +37,11 @@ public class Comment extends BaseTimeEntity {
     private Boolean isDeleted = false;
 
     public void increaseLikeCount() {
-        this.likeCount = (this.likeCount == null) ? 1 : this.likeCount + 1;
+        this.likeCount++;
     }
 
     public void decreaseLikeCount() {
-        if (this.likeCount == null || this.likeCount <= 0) return;
-        this.likeCount = this.likeCount - 1;
+        if (this.likeCount > 0) this.likeCount--;
     }
 
     public void softDelete() {

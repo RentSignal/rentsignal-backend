@@ -21,7 +21,7 @@ public class PostListItemResponse {
                 .id(post.getId())
                 .title(post.getTitle())
                 .category(post.getCategory())
-                .userId(post.getUserId())
+                .userId(post.getUser().getId())   // 수정
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getCommentCount())
                 .viewCount(post.getViewCount())

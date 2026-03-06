@@ -6,6 +6,8 @@ import me.rentsignal.community.dto.*;
 import me.rentsignal.community.repository.*;
 import me.rentsignal.global.exception.BaseException;
 import me.rentsignal.global.exception.ErrorCode;
+import me.rentsignal.user.entity.User;
+import me.rentsignal.user.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,14 +23,12 @@ public class CommunityService {
     private final CommentRepository commentRepository;
     private final PostLikeRepository postLikeRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final UserRepository userRepository;
 
     // 게시글 목록 조회
     @Transactional(readOnly = true)
-    public Page<PostListItemResponse> getPosts(
-            String category,
-            String keyword,
-            Pageable pageable
-    ) {
+    public Page<PostListItemResponse> getPosts(String category, String keyword, Pageable pageable) {
+
         return postRepository.search(category, keyword, pageable)
                 .map(PostListItemResponse::from);
     }
@@ -53,13 +53,18 @@ public class CommunityService {
 
     // 게시글 작성
     @Transactional
-    public Long createPost(PostCreateRequest request) {
+    public Long createPost(Long userId, PostCreateRequest request) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new BaseException(ErrorCode.INVALID_INPUT_VALUE, "사용자를 찾을 수 없습니다.")
+                );
 
         Post post = Post.builder()
+                .user(user)
                 .title(request.getTitle())
                 .content(request.getContent())
                 .category(request.getCategory())
-                .userId(1L) // 테스트용
                 .build();
 
         postRepository.save(post);
@@ -69,7 +74,12 @@ public class CommunityService {
 
     // 댓글 작성
     @Transactional
-    public Long createComment(Long postId, CommentCreateRequest request) {
+    public Long createComment(Long userId, Long postId, CommentCreateRequest request) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new BaseException(ErrorCode.INVALID_INPUT_VALUE, "사용자를 찾을 수 없습니다.")
+                );
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() ->
@@ -77,8 +87,8 @@ public class CommunityService {
                 );
 
         Comment comment = Comment.builder()
-                .postId(postId)
-                .userId(1L)
+                .post(post)
+                .user(user)
                 .content(request.getContent())
                 .build();
 
@@ -89,7 +99,7 @@ public class CommunityService {
         return comment.getId();
     }
 
-    // 댓글 목록 조회
+    // 댓글 조회
     @Transactional(readOnly = true)
     public Page<CommentResponse> getComments(Long postId, Pageable pageable) {
 
@@ -98,9 +108,14 @@ public class CommunityService {
                 .map(CommentResponse::from);
     }
 
-    // 게시글 좋아요 토글
+    // 게시글 좋아요
     @Transactional
-    public void togglePostLike(Long postId, Long userId) {
+    public void togglePostLike(Long userId, Long postId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new BaseException(ErrorCode.INVALID_INPUT_VALUE, "사용자를 찾을 수 없습니다.")
+                );
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() ->
@@ -108,7 +123,7 @@ public class CommunityService {
                 );
 
         Optional<PostLike> like =
-                postLikeRepository.findByPostIdAndUserId(postId, userId);
+                postLikeRepository.findByPostAndUser(post, user);
 
         if (like.isPresent()) {
 
@@ -118,8 +133,8 @@ public class CommunityService {
         } else {
 
             PostLike postLike = PostLike.builder()
-                    .postId(postId)
-                    .userId(userId)
+                    .post(post)
+                    .user(user)
                     .build();
 
             postLikeRepository.save(postLike);
@@ -127,9 +142,14 @@ public class CommunityService {
         }
     }
 
-    // 댓글 좋아요 토글
+    // 댓글 좋아요
     @Transactional
-    public void toggleCommentLike(Long commentId, Long userId) {
+    public void toggleCommentLike(Long userId, Long commentId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new BaseException(ErrorCode.INVALID_INPUT_VALUE, "사용자를 찾을 수 없습니다.")
+                );
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() ->
@@ -137,7 +157,7 @@ public class CommunityService {
                 );
 
         Optional<CommentLike> like =
-                commentLikeRepository.findByCommentIdAndUserId(commentId, userId);
+                commentLikeRepository.findByCommentAndUser(comment, user);
 
         if (like.isPresent()) {
 
@@ -147,8 +167,8 @@ public class CommunityService {
         } else {
 
             CommentLike commentLike = CommentLike.builder()
-                    .commentId(commentId)
-                    .userId(userId)
+                    .comment(comment)
+                    .user(user)
                     .build();
 
             commentLikeRepository.save(commentLike);
@@ -191,11 +211,7 @@ public class CommunityService {
 
         comment.softDelete();
 
-        Post post = postRepository.findById(comment.getPostId())
-                .orElseThrow(() ->
-                        new BaseException(ErrorCode.INVALID_INPUT_VALUE, "게시글을 찾을 수 없습니다.")
-                );
-
+        Post post = comment.getPost();
         post.decreaseCommentCount();
     }
 }

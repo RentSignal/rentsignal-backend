@@ -23,7 +23,7 @@ public class PostDetailResponse {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .category(post.getCategory())
-                .userId(post.getUserId())
+                .userId(post.getUser().getId())   //  수정
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getCommentCount())
                 .viewCount(post.getViewCount())
