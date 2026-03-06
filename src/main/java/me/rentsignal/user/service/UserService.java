@@ -19,6 +19,7 @@ public class UserService {
 
         return UserInfoDto.builder()
                 .name(user.getName())
+                .role(user.getRole())
                 .imageUrl(user.getImageUrl()).build();
     }
 
