@@ -1,9 +1,9 @@
 package me.rentsignal.global.security;
 
-import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import me.rentsignal.user.dto.TokenDto;
 import me.rentsignal.user.service.TokenService;
@@ -48,7 +48,14 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         cookieUtil.addCookie(response, "refreshToken", tokens.getRefreshToken(),
                 (int) (JwtProvider.EXPIRE_REFRESH / 1000), COOKIE_SECURE, COOKIE_SAMESITE);
 
-        // 4. redirect
+        // 4. OAuth2 로그인 과정에서 생긴 세션 무효화
+        HttpSession session = request.getSession(false);
+        if (session != null)
+            session.invalidate();
+
+        cookieUtil.expireCookie(response, "JSESSIONID", COOKIE_SECURE, COOKIE_SAMESITE);
+
+        // 5. redirect
         getRedirectStrategy().sendRedirect(request, response, REDIRECT_URI);
     }
 
