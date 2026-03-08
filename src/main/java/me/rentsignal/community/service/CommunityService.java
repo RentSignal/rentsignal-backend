@@ -116,9 +116,11 @@ public class CommunityService {
         return comment.getId();
     }
 
-    // 댓글 조회 (ROLE_GUEST도 가능 여부 정책에 따라)
+    // 댓글 조회
     @Transactional(readOnly = true)
-    public Page<CommentResponse> getComments(Long postId, Pageable pageable) {
+    public Page<CommentResponse> getComments(Long postId, Pageable pageable, CustomPrincipal principal) {
+
+        validateCommunityAccess(principal);
 
         return commentRepository
                 .findByPostIdAndIsDeletedFalse(postId, pageable)

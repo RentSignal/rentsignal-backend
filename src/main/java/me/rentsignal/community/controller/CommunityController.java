@@ -97,11 +97,12 @@ public class CommunityController {
     @GetMapping("/posts/{postId}/comments")
     public BaseResponse<Page<CommentResponse>> getComments(
             @PathVariable Long postId,
-            Pageable pageable
+            Pageable pageable,
+            @AuthenticationPrincipal CustomPrincipal principal
     ) {
 
         return BaseResponse.success(
-                communityService.getComments(postId, pageable)
+                communityService.getComments(postId, pageable, principal)
         );
     }
 
