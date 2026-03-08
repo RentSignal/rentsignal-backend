@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import me.rentsignal.community.dto.*;
 import me.rentsignal.community.service.CommunityService;
 import me.rentsignal.global.response.BaseResponse;
+import me.rentsignal.global.security.CustomPrincipal;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,7 +17,7 @@ public class CommunityController {
 
     private final CommunityService communityService;
 
-    // 게시글 목록 조회
+    // 게시글 목록 조회 (ROLE_GUEST도 가능)
     @GetMapping("/posts")
     public BaseResponse<Page<PostListItemResponse>> getPosts(
             @RequestParam(required = false) String category,
@@ -31,21 +33,23 @@ public class CommunityController {
     // 게시글 상세 조회
     @GetMapping("/posts/{postId}")
     public BaseResponse<PostDetailResponse> getPostDetail(
-            @PathVariable Long postId
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomPrincipal principal
     ) {
 
         return BaseResponse.success(
-                communityService.getPostDetail(postId)
+                communityService.getPostDetail(postId, principal)
         );
     }
 
     // 게시글 작성
     @PostMapping("/posts")
     public BaseResponse<Long> createPost(
-            @RequestBody PostCreateRequest request
+            @RequestBody PostCreateRequest request,
+            @AuthenticationPrincipal CustomPrincipal principal
     ) {
 
-        Long postId = communityService.createPost(1L, request); // 테스트용 userId
+        Long postId = communityService.createPost(request, principal);
 
         return BaseResponse.success(postId);
     }
@@ -54,21 +58,23 @@ public class CommunityController {
     @PatchMapping("/posts/{postId}")
     public BaseResponse<Void> updatePost(
             @PathVariable Long postId,
-            @RequestBody PostUpdateRequest request
+            @RequestBody PostUpdateRequest request,
+            @AuthenticationPrincipal CustomPrincipal principal
     ) {
 
-        communityService.updatePost(postId, request);
+        communityService.updatePost(postId, request, principal);
 
         return BaseResponse.success(null);
     }
 
-    // 게시글 삭제 (soft delete)
+    // 게시글 삭제
     @DeleteMapping("/posts/{postId}")
     public BaseResponse<Void> deletePost(
-            @PathVariable Long postId
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomPrincipal principal
     ) {
 
-        communityService.deletePost(postId);
+        communityService.deletePost(postId, principal);
 
         return BaseResponse.success(null);
     }
@@ -77,11 +83,12 @@ public class CommunityController {
     @PostMapping("/posts/{postId}/comments")
     public BaseResponse<Long> createComment(
             @PathVariable Long postId,
-            @RequestBody CommentCreateRequest request
+            @RequestBody CommentCreateRequest request,
+            @AuthenticationPrincipal CustomPrincipal principal
     ) {
 
         Long commentId =
-                communityService.createComment(1L, postId, request); // 테스트용 userId
+                communityService.createComment(postId, request, principal);
 
         return BaseResponse.success(commentId);
     }
@@ -98,13 +105,14 @@ public class CommunityController {
         );
     }
 
-    // 댓글 삭제 (soft delete)
+    // 댓글 삭제
     @DeleteMapping("/comments/{commentId}")
     public BaseResponse<Void> deleteComment(
-            @PathVariable Long commentId
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal CustomPrincipal principal
     ) {
 
-        communityService.deleteComment(commentId);
+        communityService.deleteComment(commentId, principal);
 
         return BaseResponse.success(null);
     }
@@ -112,10 +120,11 @@ public class CommunityController {
     // 게시글 좋아요
     @PostMapping("/posts/{postId}/likes")
     public BaseResponse<Void> togglePostLike(
-            @PathVariable Long postId
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomPrincipal principal
     ) {
 
-        communityService.togglePostLike(1L, postId); // 테스트용 userId
+        communityService.togglePostLike(postId, principal);
 
         return BaseResponse.success(null);
     }
@@ -123,10 +132,11 @@ public class CommunityController {
     // 댓글 좋아요
     @PostMapping("/comments/{commentId}/likes")
     public BaseResponse<Void> toggleCommentLike(
-            @PathVariable Long commentId
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal CustomPrincipal principal
     ) {
 
-        communityService.toggleCommentLike(1L, commentId); // 테스트용 userId
+        communityService.toggleCommentLike(commentId, principal);
 
         return BaseResponse.success(null);
     }

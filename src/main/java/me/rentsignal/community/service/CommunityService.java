@@ -6,6 +6,8 @@ import me.rentsignal.community.dto.*;
 import me.rentsignal.community.repository.*;
 import me.rentsignal.global.exception.BaseException;
 import me.rentsignal.global.exception.ErrorCode;
+import me.rentsignal.global.security.CustomPrincipal;
+import me.rentsignal.user.entity.Role;
 import me.rentsignal.user.entity.User;
 import me.rentsignal.user.repository.UserRepository;
 import org.springframework.data.domain.Page;
@@ -25,7 +27,22 @@ public class CommunityService {
     private final CommentLikeRepository commentLikeRepository;
     private final UserRepository userRepository;
 
-    // 게시글 목록 조회
+    // ROLE 체크
+    private void validateCommunityAccess(CustomPrincipal principal) {
+
+        if (principal.getRole() == Role.ROLE_GUEST) {
+            throw new BaseException(ErrorCode.FORBIDDEN, principal.getRole().name());
+        }
+    }
+
+    // 로그인 유저 조회
+    private User getUser(CustomPrincipal principal) {
+
+        return userRepository.findById(principal.getId())
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    // 게시글 목록 조회 (ROLE_GUEST도 가능)
     @Transactional(readOnly = true)
     public Page<PostListItemResponse> getPosts(String category, String keyword, Pageable pageable) {
 
@@ -35,7 +52,9 @@ public class CommunityService {
 
     // 게시글 상세 조회
     @Transactional
-    public PostDetailResponse getPostDetail(Long postId) {
+    public PostDetailResponse getPostDetail(Long postId, CustomPrincipal principal) {
+
+        validateCommunityAccess(principal);
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() ->
@@ -48,15 +67,16 @@ public class CommunityService {
 
         post.increaseViewCount();
 
-        return PostDetailResponse.from(post);
+        return PostDetailResponse.from(post, principal.getRole());
     }
 
     // 게시글 작성
     @Transactional
-    public Long createPost(Long userId, PostCreateRequest request) {
+    public Long createPost(PostCreateRequest request, CustomPrincipal principal) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        validateCommunityAccess(principal);
+
+        User user = getUser(principal);
 
         Post post = Post.builder()
                 .user(user)
@@ -72,10 +92,11 @@ public class CommunityService {
 
     // 댓글 작성
     @Transactional
-    public Long createComment(Long userId, Long postId, CommentCreateRequest request) {
+    public Long createComment(Long postId, CommentCreateRequest request, CustomPrincipal principal) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        validateCommunityAccess(principal);
+
+        User user = getUser(principal);
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() ->
@@ -95,7 +116,7 @@ public class CommunityService {
         return comment.getId();
     }
 
-    // 댓글 조회
+    // 댓글 조회 (ROLE_GUEST도 가능 여부 정책에 따라)
     @Transactional(readOnly = true)
     public Page<CommentResponse> getComments(Long postId, Pageable pageable) {
 
@@ -106,10 +127,11 @@ public class CommunityService {
 
     // 게시글 좋아요
     @Transactional
-    public void togglePostLike(Long userId, Long postId) {
+    public void togglePostLike(Long postId, CustomPrincipal principal) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        validateCommunityAccess(principal);
+
+        User user = getUser(principal);
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() ->
@@ -138,10 +160,11 @@ public class CommunityService {
 
     // 댓글 좋아요
     @Transactional
-    public void toggleCommentLike(Long userId, Long commentId) {
+    public void toggleCommentLike(Long commentId, CustomPrincipal principal) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        validateCommunityAccess(principal);
+
+        User user = getUser(principal);
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() ->
@@ -170,7 +193,9 @@ public class CommunityService {
 
     // 게시글 수정
     @Transactional
-    public void updatePost(Long postId, PostUpdateRequest request) {
+    public void updatePost(Long postId, PostUpdateRequest request, CustomPrincipal principal) {
+
+        validateCommunityAccess(principal);
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() ->
@@ -182,7 +207,9 @@ public class CommunityService {
 
     // 게시글 삭제
     @Transactional
-    public void deletePost(Long postId) {
+    public void deletePost(Long postId, CustomPrincipal principal) {
+
+        validateCommunityAccess(principal);
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() ->
@@ -194,7 +221,9 @@ public class CommunityService {
 
     // 댓글 삭제
     @Transactional
-    public void deleteComment(Long commentId) {
+    public void deleteComment(Long commentId, CustomPrincipal principal) {
+
+        validateCommunityAccess(principal);
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() ->
