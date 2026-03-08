@@ -56,9 +56,7 @@ public class CommunityService {
     public Long createPost(Long userId, PostCreateRequest request) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new BaseException(ErrorCode.INVALID_INPUT_VALUE, "사용자를 찾을 수 없습니다.")
-                );
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
         Post post = Post.builder()
                 .user(user)
@@ -77,9 +75,7 @@ public class CommunityService {
     public Long createComment(Long userId, Long postId, CommentCreateRequest request) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new BaseException(ErrorCode.INVALID_INPUT_VALUE, "사용자를 찾을 수 없습니다.")
-                );
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() ->
@@ -113,9 +109,7 @@ public class CommunityService {
     public void togglePostLike(Long userId, Long postId) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new BaseException(ErrorCode.INVALID_INPUT_VALUE, "사용자를 찾을 수 없습니다.")
-                );
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() ->
@@ -147,9 +141,7 @@ public class CommunityService {
     public void toggleCommentLike(Long userId, Long commentId) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new BaseException(ErrorCode.INVALID_INPUT_VALUE, "사용자를 찾을 수 없습니다.")
-                );
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() ->
