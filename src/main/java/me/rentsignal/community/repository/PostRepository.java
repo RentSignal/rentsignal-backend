@@ -1,6 +1,7 @@
 package me.rentsignal.community.repository;
 
 import me.rentsignal.community.domain.Post;
+import me.rentsignal.user.entity.User;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
@@ -20,4 +21,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             @Param("keyword") String keyword,
             Pageable pageable
     );
+    // 내가 쓴 글 조회
+    Page<Post> findByUser(User user, Pageable pageable);
 }

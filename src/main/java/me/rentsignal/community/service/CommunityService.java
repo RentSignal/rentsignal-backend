@@ -240,4 +240,36 @@ public class CommunityService {
         Post post = comment.getPost();
         post.decreaseCommentCount();
     }
+    // 내가 쓴 게시글
+    @Transactional(readOnly = true)
+    public Page<PostListItemResponse> getMyPosts(CustomPrincipal principal, Pageable pageable) {
+
+        User user = authService.getCurrentUser(principal.getId());
+
+        return postRepository
+                .findByUser(user, pageable)
+                .map(PostListItemResponse::from);
+    }
+
+    // 내가 쓴 댓글
+    @Transactional(readOnly = true)
+    public Page<CommentResponse> getMyComments(CustomPrincipal principal, Pageable pageable) {
+
+        User user = authService.getCurrentUser(principal.getId());
+
+        return commentRepository
+                .findByUser(user, pageable)
+                .map(CommentResponse::from);
+    }
+
+    // 내가 좋아요한 글
+    @Transactional(readOnly = true)
+    public Page<PostListItemResponse> getMyLikedPosts(CustomPrincipal principal, Pageable pageable) {
+
+        User user = authService.getCurrentUser(principal.getId());
+
+        return postLikeRepository
+                .findByUser(user, pageable)
+                .map(postLike -> PostListItemResponse.from(postLike.getPost()));
+    }
 }
