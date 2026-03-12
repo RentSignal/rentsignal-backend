@@ -141,5 +141,40 @@ public class CommunityController {
 
         return BaseResponse.success(null);
     }
+    // 내가 쓴 게시글 조회
+    @GetMapping("/mypage/posts")
+    public BaseResponse<Page<PostListItemResponse>> getMyPosts(
+            @AuthenticationPrincipal CustomPrincipal principal,
+            Pageable pageable
+    ) {
+
+        return BaseResponse.success(
+                communityService.getMyPosts(principal, pageable)
+        );
+    }
+
+    // 내가 쓴 댓글 조회
+    @GetMapping("/mypage/comments")
+    public BaseResponse<Page<CommentResponse>> getMyComments(
+            @AuthenticationPrincipal CustomPrincipal principal,
+            Pageable pageable
+    ) {
+
+        return BaseResponse.success(
+                communityService.getMyComments(principal, pageable)
+        );
+    }
+
+    // 내가 좋아요한 게시글 조회
+    @GetMapping("/mypage/likes")
+    public BaseResponse<Page<PostListItemResponse>> getMyLikedPosts(
+            @AuthenticationPrincipal CustomPrincipal principal,
+            Pageable pageable
+    ) {
+
+        return BaseResponse.success(
+                communityService.getMyLikedPosts(principal, pageable)
+        );
+    }
 
 }
