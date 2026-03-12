@@ -5,6 +5,8 @@ import lombok.Getter;
 import me.rentsignal.community.domain.Post;
 import me.rentsignal.user.entity.Role;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 public class PostDetailResponse {
@@ -18,6 +20,8 @@ public class PostDetailResponse {
     private Integer commentCount;
     private Integer viewCount;
     private String role;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public static PostDetailResponse from(Post post, Role role) {
         return PostDetailResponse.builder()
@@ -29,6 +33,8 @@ public class PostDetailResponse {
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getCommentCount())
                 .viewCount(post.getViewCount())
+                .createdAt(post.getCreatedAt())
+                .updatedAt(post.getUpdatedAt())
                 .role(role.name())
                 .build();
     }

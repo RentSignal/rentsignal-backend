@@ -4,6 +4,8 @@ import lombok.Builder;
 import lombok.Getter;
 import me.rentsignal.community.domain.Comment;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 public class CommentResponse {
@@ -13,6 +15,7 @@ public class CommentResponse {
     private Long userId;
     private String content;
     private Integer likeCount;
+    private LocalDateTime createdAt;
 
     public static CommentResponse from(Comment comment) {
         return CommentResponse.builder()
@@ -21,6 +24,7 @@ public class CommentResponse {
                 .userId(comment.getUser().getId())   //  수정
                 .content(comment.getContent())
                 .likeCount(comment.getLikeCount())
+                .createdAt(comment.getCreatedAt())
                 .build();
     }
 }
