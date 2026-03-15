@@ -10,5 +10,6 @@ public class PostCreateRequest {
     private String category;
     private String title;
     private String content;
+    private Long neighborhoodId;
 
 }

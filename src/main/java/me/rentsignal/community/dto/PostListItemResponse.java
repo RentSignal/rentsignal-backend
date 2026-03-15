@@ -14,6 +14,7 @@ public class PostListItemResponse {
     private String title;
     private String category;
     private Long userId;
+    private String neighborhoodName;
     private Integer likeCount;
     private Integer commentCount;
     private Integer viewCount;
@@ -24,7 +25,8 @@ public class PostListItemResponse {
                 .id(post.getId())
                 .title(post.getTitle())
                 .category(post.getCategory())
-                .userId(post.getUser().getId())   // 수정
+                .userId(post.getUser().getId())
+                .neighborhoodName(post.getNeighborhood().getName())
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getCommentCount())
                 .viewCount(post.getViewCount())

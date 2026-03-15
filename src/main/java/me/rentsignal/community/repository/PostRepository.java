@@ -12,15 +12,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
         select p from Post p
         where p.isDeleted = false
           and (:category is null or p.category = :category)
-          and (:keyword is null or (p.title like concat('%', :keyword, '%')
-          or p.content like concat('%', :keyword, '%')))
+          and (:neighborhoodId is null or p.neighborhood.id = :neighborhoodId)
     """)
     Page<Post> search(
-          //  @Param("neighborhoodId") Long neighborhoodId,
             @Param("category") String category,
-            @Param("keyword") String keyword,
+            @Param("neighborhoodId") Long neighborhoodId,
             Pageable pageable
     );
+
     // 내가 쓴 글 조회
     Page<Post> findByUser(User user, Pageable pageable);
 }
