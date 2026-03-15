@@ -16,6 +16,7 @@ public class PostDetailResponse {
     private String content;
     private String category;
     private Long userId;
+    private String userName;
     private String neighborhoodName;
     private Integer likeCount;
     private Integer commentCount;
@@ -31,6 +32,7 @@ public class PostDetailResponse {
                 .content(post.getContent())
                 .category(post.getCategory())
                 .userId(post.getUser().getId())
+                .userName(post.getUser().getName())
                 .neighborhoodName(post.getNeighborhood().getName())
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getCommentCount())
