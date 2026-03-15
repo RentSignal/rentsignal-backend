@@ -21,12 +21,12 @@ public class CommunityController {
     @GetMapping("/posts")
     public BaseResponse<Page<PostListItemResponse>> getPosts(
             @RequestParam(required = false) String category,
-            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long neighborhoodId,
             Pageable pageable
-    ) {
-
+    )
+    {
         return BaseResponse.success(
-                communityService.getPosts(category, keyword, pageable)
+                communityService.getPosts(category, neighborhoodId, pageable)
         );
     }
 

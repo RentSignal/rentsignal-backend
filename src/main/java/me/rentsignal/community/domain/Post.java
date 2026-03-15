@@ -5,6 +5,7 @@ import lombok.*;
 import me.rentsignal.global.entity.BaseTimeEntity;
 import me.rentsignal.user.entity.User;
 import org.hibernate.annotations.Where;
+import me.rentsignal.location.entity.Neighborhood;
 
 @Entity
 @Getter
@@ -28,6 +29,10 @@ public class Post extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "neighborhood_id")
+    private Neighborhood neighborhood;
 
     @Builder.Default
     private Integer likeCount = 0;
