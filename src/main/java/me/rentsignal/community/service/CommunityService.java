@@ -128,7 +128,7 @@ public class CommunityService {
         validateCommunityAccess(principal);
 
         return commentRepository
-                .findByPostIdAndIsDeletedFalse(postId, pageable)
+                .findByPostIdAndIsDeletedFalseOrderByCreatedAtAsc(postId, pageable)
                 .map(CommentResponse::from);
     }
 
