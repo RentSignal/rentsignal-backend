@@ -25,7 +25,7 @@ public class PostListItemResponse {
         return PostListItemResponse.builder()
                 .id(post.getId())
                 .title(post.getTitle())
-                .category(post.getCategory())
+                .category(post.getCategory().getLabel())
                 .userId(post.getUser().getId())
                 .userName(post.getUser().getName())
                 .neighborhoodName(post.getNeighborhood().getName())

@@ -30,7 +30,7 @@ public class PostDetailResponse {
                 .id(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .category(post.getCategory())
+                .category(post.getCategory().getLabel())
                 .userId(post.getUser().getId())
                 .userName(post.getUser().getName())
                 .neighborhoodName(post.getNeighborhood().getName())

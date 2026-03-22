@@ -1,6 +1,8 @@
 package me.rentsignal.community.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import me.rentsignal.community.domain.Category;
 import me.rentsignal.community.dto.*;
 import me.rentsignal.community.service.CommunityService;
 import me.rentsignal.global.response.BaseResponse;
@@ -20,7 +22,7 @@ public class CommunityController {
     // 게시글 목록 조회 (ROLE_GUEST도 가능)
     @GetMapping("/posts")
     public BaseResponse<Page<PostListItemResponse>> getPosts(
-            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Category category,
             @RequestParam(required = false) Long neighborhoodId,
             Pageable pageable
     )
@@ -45,12 +47,10 @@ public class CommunityController {
     // 게시글 작성
     @PostMapping("/posts")
     public BaseResponse<Long> createPost(
-            @RequestBody PostCreateRequest request,
+            @Valid @RequestBody PostCreateRequest request,
             @AuthenticationPrincipal CustomPrincipal principal
     ) {
-
         Long postId = communityService.createPost(request, principal);
-
         return BaseResponse.success(postId);
     }
 
@@ -83,10 +83,9 @@ public class CommunityController {
     @PostMapping("/posts/{postId}/comments")
     public BaseResponse<Long> createComment(
             @PathVariable Long postId,
-            @RequestBody CommentCreateRequest request,
+            @Valid @RequestBody CommentCreateRequest request,
             @AuthenticationPrincipal CustomPrincipal principal
     ) {
-
         Long commentId =
                 communityService.createComment(postId, request, principal);
 
