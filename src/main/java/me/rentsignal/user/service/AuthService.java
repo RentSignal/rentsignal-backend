@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import me.rentsignal.global.exception.BaseException;
 import me.rentsignal.global.exception.ErrorCode;
 import me.rentsignal.global.security.CookieUtil;
+import me.rentsignal.user.entity.Role;
 import me.rentsignal.user.entity.User;
 import me.rentsignal.user.repository.RefreshTokenRepository;
 import me.rentsignal.user.repository.UserRepository;
@@ -56,6 +57,16 @@ public class AuthService {
         // 쿠키 삭제
         cookieUtil.expireCookie(response, "accessToken", COOKIE_SECURE, COOKIE_SAMESITE);
         cookieUtil.expireCookie(response, "refreshToken", COOKIE_SECURE, COOKIE_SAMESITE);
+    }
+
+    public User validateUserAccess(Long userId) {
+        User user = getCurrentUser(userId);
+
+        if (user.getRole() == Role.ROLE_GUEST)
+            throw new BaseException(ErrorCode.FORBIDDEN, "현재 사용자 role - " + user.getRole().name());
+
+
+        return user;
     }
 
 }
