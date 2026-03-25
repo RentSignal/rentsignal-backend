@@ -19,6 +19,9 @@ public enum ErrorCode {
     SOCIAL_ACCOUNT_NOT_OWNED(HttpStatus.INTERNAL_SERVER_ERROR, "사용자가 해당 소셜 계정을 보유하고 있지 않습니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
 
+    // 외부 API 관련
+    EXTERNAL_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "외부 API에서 오류가 발생했습니다."),
+
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "잘못된 입력값입니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.");
 
