@@ -228,9 +228,6 @@ public class CommunityService {
             post.updateContent(request.getContent());
         }
 
-        if (request.getCategory() != null) {
-            post.updateCategory(request.getCategory());
-        }
     }
 
     // 게시글 삭제

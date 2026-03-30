@@ -22,13 +22,12 @@ public class CommunityController {
     // 게시글 목록 조회 (ROLE_GUEST도 가능)
     @GetMapping("/posts")
     public BaseResponse<Page<PostListItemResponse>> getPosts(
-            @RequestParam(required = false) Category category,
             @RequestParam(required = false) Long neighborhoodId,
             Pageable pageable
     )
     {
         return BaseResponse.success(
-                communityService.getPosts(category, neighborhoodId, pageable)
+                communityService.getPosts(null, neighborhoodId, pageable)
         );
     }
 

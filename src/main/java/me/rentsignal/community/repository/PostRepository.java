@@ -1,5 +1,6 @@
 package me.rentsignal.community.repository;
 
+import me.rentsignal.community.domain.Category;
 import me.rentsignal.community.domain.Post;
 import me.rentsignal.user.entity.User;
 import org.springframework.data.domain.*;
@@ -16,9 +17,8 @@ where p.isDeleted = false
   and (:neighborhoodId is null or p.neighborhood.id = :neighborhoodId)
 order by p.createdAt desc
 """)
-
     Page<Post> search(
-            @Param("category") String category,
+            @Param("category") Category category,
             @Param("neighborhoodId") Long neighborhoodId,
             Pageable pageable
     );
