@@ -13,6 +13,7 @@ public class CommentResponse {
     private Long id;
     private Long postId;
     private Long userId;
+    private String userName;
     private String content;
     private Integer likeCount;
     private LocalDateTime createdAt;
@@ -20,8 +21,9 @@ public class CommentResponse {
     public static CommentResponse from(Comment comment) {
         return CommentResponse.builder()
                 .id(comment.getId())
-                .postId(comment.getPost().getId())   //  수정
-                .userId(comment.getUser().getId())   //  수정
+                .postId(comment.getPost().getId())
+                .userId(comment.getUser().getId())
+                .userName(comment.getUser().getName())
                 .content(comment.getContent())
                 .likeCount(comment.getLikeCount())
                 .createdAt(comment.getCreatedAt())

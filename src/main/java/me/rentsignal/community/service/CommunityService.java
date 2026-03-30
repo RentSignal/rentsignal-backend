@@ -7,6 +7,8 @@ import me.rentsignal.community.repository.*;
 import me.rentsignal.global.exception.BaseException;
 import me.rentsignal.global.exception.ErrorCode;
 import me.rentsignal.global.security.CustomPrincipal;
+import me.rentsignal.location.entity.Neighborhood;
+import me.rentsignal.location.repository.NeighborhoodRepository;
 import me.rentsignal.user.entity.Role;
 import me.rentsignal.user.entity.User;
 import me.rentsignal.user.service.AuthService;
@@ -25,13 +27,12 @@ public class CommunityService {
     private final CommentRepository commentRepository;
     private final PostLikeRepository postLikeRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final NeighborhoodRepository neighborhoodRepository;
     private final AuthService authService;
 
     // 커뮤니티 권한 체크
     private User validateCommunityAccess(CustomPrincipal principal) {
-
         Long userId = principal.getId();
-
         User user = authService.getCurrentUser(userId);
 
         if (user.getRole() == Role.ROLE_GUEST) {
@@ -41,11 +42,10 @@ public class CommunityService {
         return user;
     }
 
-    // 게시글 목록 조회 (ROLE_GUEST도 가능)
+    // 게시글 목록 조회
     @Transactional(readOnly = true)
-    public Page<PostListItemResponse> getPosts(String category, String keyword, Pageable pageable) {
-
-        return postRepository.search(category, keyword, pageable)
+    public Page<PostListItemResponse> getPosts(Category category, Long neighborhoodId, Pageable pageable) {
+        return postRepository.search(category, neighborhoodId, pageable)
                 .map(PostListItemResponse::from);
     }
 
@@ -75,11 +75,33 @@ public class CommunityService {
 
         User user = validateCommunityAccess(principal);
 
+        // 카테고리 검증
+        if (request.getCategory() == null) {
+            throw new BaseException(ErrorCode.INVALID_INPUT_VALUE, "카테고리를 선택해주세요.");
+        }
+
+        // 제목 검증
+        if (request.getTitle() == null || request.getTitle().isBlank()) {
+            throw new BaseException(ErrorCode.INVALID_INPUT_VALUE, "제목을 입력해주세요.");
+        }
+
+        // 내용 검증
+        if (request.getContent() == null || request.getContent().isBlank()) {
+            throw new BaseException(ErrorCode.INVALID_INPUT_VALUE, "내용을 입력해주세요.");
+        }
+
+        Neighborhood neighborhood =
+                neighborhoodRepository.findById(request.getNeighborhoodId())
+                        .orElseThrow(() ->
+                                new BaseException(ErrorCode.INVALID_INPUT_VALUE, "동네를 찾을 수 없습니다.")
+                        );
+
         Post post = Post.builder()
                 .user(user)
                 .title(request.getTitle())
                 .content(request.getContent())
                 .category(request.getCategory())
+                .neighborhood(neighborhood)
                 .build();
 
         postRepository.save(post);
@@ -92,6 +114,10 @@ public class CommunityService {
     public Long createComment(Long postId, CommentCreateRequest request, CustomPrincipal principal) {
 
         User user = validateCommunityAccess(principal);
+
+        if (request.getContent() == null || request.getContent().isBlank()) {
+            throw new BaseException(ErrorCode.INVALID_INPUT_VALUE, "댓글 내용을 입력해주세요.");
+        }
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() ->
@@ -118,7 +144,7 @@ public class CommunityService {
         validateCommunityAccess(principal);
 
         return commentRepository
-                .findByPostIdAndIsDeletedFalse(postId, pageable)
+                .findByPostIdAndIsDeletedFalseOrderByCreatedAtAsc(postId, pageable)
                 .map(CommentResponse::from);
     }
 
@@ -137,12 +163,9 @@ public class CommunityService {
                 postLikeRepository.findByPostAndUser(post, user);
 
         if (like.isPresent()) {
-
             postLikeRepository.delete(like.get());
             post.decreaseLikeCount();
-
         } else {
-
             PostLike postLike = PostLike.builder()
                     .post(post)
                     .user(user)
@@ -168,12 +191,9 @@ public class CommunityService {
                 commentLikeRepository.findByCommentAndUser(comment, user);
 
         if (like.isPresent()) {
-
             commentLikeRepository.delete(like.get());
             comment.decreaseLikeCount();
-
         } else {
-
             CommentLike commentLike = CommentLike.builder()
                     .comment(comment)
                     .user(user)
@@ -199,7 +219,15 @@ public class CommunityService {
             throw new BaseException(ErrorCode.INVALID_INPUT_VALUE, "작성자만 수정할 수 있습니다.");
         }
 
-        post.update(request.getTitle(), request.getContent());
+        // 부분 수정
+        if (request.getTitle() != null && !request.getTitle().isBlank()) {
+            post.updateTitle(request.getTitle());
+        }
+
+        if (request.getContent() != null && !request.getContent().isBlank()) {
+            post.updateContent(request.getContent());
+        }
+
     }
 
     // 게시글 삭제
@@ -240,6 +268,7 @@ public class CommunityService {
         Post post = comment.getPost();
         post.decreaseCommentCount();
     }
+
     // 내가 쓴 게시글
     @Transactional(readOnly = true)
     public Page<PostListItemResponse> getMyPosts(CustomPrincipal principal, Pageable pageable) {

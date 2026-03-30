@@ -5,6 +5,7 @@ import lombok.*;
 import me.rentsignal.global.entity.BaseTimeEntity;
 import me.rentsignal.user.entity.User;
 import org.hibernate.annotations.Where;
+import me.rentsignal.location.entity.Neighborhood;
 
 @Entity
 @Getter
@@ -23,11 +24,17 @@ public class Post extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    private String category;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "neighborhood_id")
+    private Neighborhood neighborhood;
 
     @Builder.Default
     private Integer likeCount = 0;
@@ -65,6 +72,17 @@ public class Post extends BaseTimeEntity {
     public void update(String title, String content) {
         this.title = title;
         this.content = content;
+    }
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
+    public void updateCategory(Category category) {
+        this.category = category;
     }
 
     public void softDelete() {
