@@ -7,16 +7,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import me.rentsignal.global.entity.BaseTimeEntity;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * 시 / 군 / 구
+ * 리
  */
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class District extends BaseTimeEntity {
+public class Ri extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy =  GenerationType.IDENTITY)
@@ -29,17 +26,14 @@ public class District extends BaseTimeEntity {
     private String code;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "province_id", nullable = false)
-    private Province province;
-
-    @OneToMany(mappedBy = "district")
-    private List<Neighborhood> neighborhoods = new ArrayList<>();
+    @JoinColumn(name = "neighborhood_id", nullable = false)
+    private Neighborhood neighborhood;
 
     @Builder
-    public District(String name, String code, Province province) {
+    public Ri(String name, String code, Neighborhood neighborhood) {
         this.name = name;
         this.code = code;
-        this.province = province;
+        this.neighborhood = neighborhood;
     }
 
 }

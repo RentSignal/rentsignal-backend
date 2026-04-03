@@ -2,9 +2,13 @@ package me.rentsignal.location.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import me.rentsignal.global.entity.BaseTimeEntity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 읍 / 면 / 동
@@ -32,5 +36,15 @@ public class Neighborhood extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "district_id", nullable = false)
     private District district;
+
+    @OneToMany(mappedBy = "neighborhood")
+    private List<Ri> ris = new ArrayList<>();
+
+    @Builder
+    public Neighborhood(String name, String code, District district) {
+        this.name = name;
+        this.code = code;
+        this.district = district;
+    }
 
 }
