@@ -22,6 +22,15 @@ public enum ErrorCode {
     // 외부 API 관련
     EXTERNAL_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "외부 API에서 오류가 발생했습니다."),
 
+    // 데이터 관련
+    CSV_READ_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "CSV 읽기에 실패했습니다."),
+
+    // 지역 관련
+    PROVINCE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 시/도를 찾을 수 없습니다."),
+    DISTRICT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 시/군/구를 찾을 수 없습니다."),
+    NEIGHBORHOOD_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 읍/면/동을 찾을 수 없습니다."),
+    RI_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 리를 찾을 수 없습니다."),
+
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "잘못된 입력값입니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.");
 

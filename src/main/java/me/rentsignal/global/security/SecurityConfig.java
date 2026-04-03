@@ -44,7 +44,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.GET, "/api/community/posts").permitAll()   // 게시글 목록은 전체 접근 허용
-                        .requestMatchers( "/api/community/**", "/api/mypage/**", "/api/recommend").authenticated()
+                        .requestMatchers( "/api/community/**", "/api/mypage/**", "/api/recommend", "/api/admin/**").authenticated()
                         .anyRequest().permitAll())
 
                 .oauth2Login(oauth -> oauth
