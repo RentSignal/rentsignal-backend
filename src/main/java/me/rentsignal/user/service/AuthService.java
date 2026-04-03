@@ -59,12 +59,11 @@ public class AuthService {
         cookieUtil.expireCookie(response, "refreshToken", COOKIE_SECURE, COOKIE_SAMESITE);
     }
 
-    public User validateUserAccess(Long userId) {
+    public User validateUserAccess(Long userId, Role requiredRole) {
         User user = getCurrentUser(userId);
 
-        if (user.getRole() == Role.ROLE_GUEST)
-            throw new BaseException(ErrorCode.FORBIDDEN, "현재 사용자 role - " + user.getRole().name());
-
+        if (user.getRole() != requiredRole && user.getRole() != Role.ROLE_ADMIN)
+            throw new BaseException(ErrorCode.FORBIDDEN, "현재 사용자 role - " + user.getRole().name() + ", API 필수 role - " + requiredRole.name());
 
         return user;
     }
