@@ -90,11 +90,14 @@ public class CommunityService {
             throw new BaseException(ErrorCode.INVALID_INPUT_VALUE, "내용을 입력해주세요.");
         }
 
-        Neighborhood neighborhood =
-                neighborhoodRepository.findById(request.getNeighborhoodId())
-                        .orElseThrow(() ->
-                                new BaseException(ErrorCode.INVALID_INPUT_VALUE, "동네를 찾을 수 없습니다.")
-                        );
+        Neighborhood neighborhood = null;
+
+        if (request.getNeighborhoodId() != null) {
+            neighborhood = neighborhoodRepository.findById(request.getNeighborhoodId())
+                    .orElseThrow(() ->
+                            new BaseException(ErrorCode.INVALID_INPUT_VALUE, "동네를 찾을 수 없습니다.")
+                    );
+        }
 
         Post post = Post.builder()
                 .user(user)
