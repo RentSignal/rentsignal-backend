@@ -6,6 +6,7 @@ build/
 .kotlin
 .idea/
 .env
+**/src/main/resources/legal-dong-code.csv
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

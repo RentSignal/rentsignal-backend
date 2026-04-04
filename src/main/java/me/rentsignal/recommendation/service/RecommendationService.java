@@ -8,6 +8,7 @@ import me.rentsignal.recommendation.dto.AiRecommendRequestDto;
 import me.rentsignal.recommendation.dto.AiRecommendResponseDto;
 import me.rentsignal.recommendation.dto.RecommendRequestDto;
 import me.rentsignal.recommendation.dto.RecommendResponseDto;
+import me.rentsignal.user.entity.Role;
 import me.rentsignal.user.service.AuthService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -33,7 +34,7 @@ public class RecommendationService {
     private final AuthService authService;
 
     public RecommendResponseDto getRecommendation(Long userId, RecommendRequestDto requestDto) {
-        authService.validateUserAccess(userId);
+        authService.validateUserAccess(userId, Role.ROLE_USER);
 
         // 1 ) AI API 요청 DTO를 생성하기 위해 변환 ----------
         String userDong = requestDto.getUserDong() != null ? requestDto.getUserDong() : "";
