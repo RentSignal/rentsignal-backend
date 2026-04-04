@@ -2,6 +2,7 @@ package me.rentsignal.data.controller;
 
 import lombok.RequiredArgsConstructor;
 import me.rentsignal.data.service.DataService;
+import me.rentsignal.data.service.IndexService;
 import me.rentsignal.data.service.LegalDongImportService;
 import me.rentsignal.global.response.BaseResponse;
 import me.rentsignal.global.security.CustomPrincipal;
@@ -18,6 +19,7 @@ public class DataController {
 
     private final LegalDongImportService legalDongImportService;
     private final DataService dataService;
+    private final IndexService indexService;
 
     @PostMapping("/legal-dong")
     public ResponseEntity<?> saveLegalDong(@AuthenticationPrincipal CustomPrincipal customPrincipal) {
@@ -28,6 +30,12 @@ public class DataController {
     @PostMapping("/region")
     public ResponseEntity<?> saveRegion(@AuthenticationPrincipal CustomPrincipal customPrincipal) {
         dataService.saveRegion(customPrincipal.getId());
+        return ResponseEntity.ok().body(BaseResponse.success(null));
+    }
+
+    @PostMapping("/rent-index/apt")
+    public ResponseEntity<?> saveAptRentIndex(@AuthenticationPrincipal CustomPrincipal customPrincipal) {
+        indexService.saveAptRentCompositeIndex(customPrincipal.getId());
         return ResponseEntity.ok().body(BaseResponse.success(null));
     }
 
