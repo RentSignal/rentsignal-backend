@@ -18,7 +18,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class DataService {
+public class RegionDataService {
 
     private final AuthService authService;
     private final DistrictRepository districtRepository;
