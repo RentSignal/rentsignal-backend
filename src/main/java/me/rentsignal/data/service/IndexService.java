@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
-import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
@@ -44,34 +43,34 @@ public class IndexService {
     private final RegionRepository regionRepository;
     private final AuthService authService;
 
-    public void saveAptRentCompositeIndex(Long userId) {
+    public void saveRentCompositeIndex(Long userId, HousingType housingType) {
         authService.validateUserAccess(userId, Role.ROLE_ADMIN);
 
         // 서울 > 강북지역 > 도심권
         Region northCentral = findRegionByAreaGroupAndAreaName("강북", "도심권");
-        saveRegionIndex(northCentral, HousingType.APARTMENT,
-                getFilteredRentIndex("520010", HousingType.APARTMENT));
+        saveRegionIndex(northCentral, housingType,
+                getFilteredRentIndex("520010", housingType));
 
 
         // 서울 > 강북지역 > 동북권
         Region northNorthEast = findRegionByAreaGroupAndAreaName("강북", "동북권");
-        saveRegionIndex(northNorthEast, HousingType.APARTMENT,
-                getFilteredRentIndex("520011", HousingType.APARTMENT));
+        saveRegionIndex(northNorthEast, housingType,
+                getFilteredRentIndex("520011", housingType));
 
         // 서울 > 강북지역 > 서북권
         Region northNorthWest = findRegionByAreaGroupAndAreaName("강북", "서북권");
-        saveRegionIndex(northNorthWest, HousingType.APARTMENT,
-                getFilteredRentIndex("520012", HousingType.APARTMENT));
+        saveRegionIndex(northNorthWest, housingType,
+                getFilteredRentIndex("520012", housingType));
 
         // 서울 > 강남지역 > 서남권
         Region southSouthWest = findRegionByAreaGroupAndAreaName("강남", "서남권");
-        saveRegionIndex(southSouthWest, HousingType.APARTMENT,
-                getFilteredRentIndex("520014", HousingType.APARTMENT));
+        saveRegionIndex(southSouthWest, housingType,
+                getFilteredRentIndex("520014", housingType));
 
         // 서울 > 강남지역 > 동남권
         Region southSouthEast = findRegionByAreaGroupAndAreaName("강남", "동남권");
-        saveRegionIndex(southSouthEast, HousingType.APARTMENT,
-                getFilteredRentIndex("520015", HousingType.APARTMENT));
+        saveRegionIndex(southSouthEast, housingType,
+                getFilteredRentIndex("520015", housingType));
 
     }
 

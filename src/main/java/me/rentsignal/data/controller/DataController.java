@@ -6,11 +6,10 @@ import me.rentsignal.data.service.IndexService;
 import me.rentsignal.data.service.LegalDongImportService;
 import me.rentsignal.global.response.BaseResponse;
 import me.rentsignal.global.security.CustomPrincipal;
+import me.rentsignal.locationInfo.entity.HousingType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,9 +32,10 @@ public class DataController {
         return ResponseEntity.ok().body(BaseResponse.success(null));
     }
 
-    @PostMapping("/rent-index/apt")
-    public ResponseEntity<?> saveAptRentIndex(@AuthenticationPrincipal CustomPrincipal customPrincipal) {
-        indexService.saveAptRentCompositeIndex(customPrincipal.getId());
+    @PostMapping("/rent-index")
+    public ResponseEntity<?> saveRentIndex(@AuthenticationPrincipal CustomPrincipal customPrincipal,
+                                           @RequestParam HousingType housingType) {
+        indexService.saveRentCompositeIndex(customPrincipal.getId(), housingType);
         return ResponseEntity.ok().body(BaseResponse.success(null));
     }
 
