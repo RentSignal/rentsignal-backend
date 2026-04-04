@@ -3,6 +3,7 @@ package me.rentsignal.locationInfo.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import me.rentsignal.global.entity.BaseTimeEntity;
@@ -38,5 +39,12 @@ public class ProvinceIndex extends BaseTimeEntity {
     @Pattern(regexp = "\\d{6}")
     @Column(nullable = false, name = "base_year_month", length = 6)
     private String baseYearMonth;
+
+    @Builder
+    public ProvinceIndex(Province province, BigDecimal consumerSentimentIndex, String baseYearMonth) {
+        this.province = province;
+        this.consumerSentimentIndex = consumerSentimentIndex;
+        this.baseYearMonth = baseYearMonth;
+    }
 
 }

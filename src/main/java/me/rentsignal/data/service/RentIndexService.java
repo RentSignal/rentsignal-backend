@@ -11,13 +11,13 @@ import me.rentsignal.location.repository.RegionRepository;
 import me.rentsignal.locationInfo.entity.HousingType;
 import me.rentsignal.locationInfo.entity.RegionIndex;
 import me.rentsignal.locationInfo.repository.RegionIndexRepository;
-import me.rentsignal.recommendation.dto.AiRecommendRequestDto;
 import me.rentsignal.user.entity.Role;
 import me.rentsignal.user.service.AuthService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
@@ -43,6 +43,7 @@ public class RentIndexService {
     private final RegionRepository regionRepository;
     private final AuthService authService;
 
+    @Transactional
     public void saveRentCompositeIndex(Long userId, HousingType housingType) {
         authService.validateUserAccess(userId, Role.ROLE_ADMIN);
 
@@ -84,9 +85,6 @@ public class RentIndexService {
     private List<IndexApiResponseDto.Row> getFilteredRentIndex(String classificationId, HousingType housingType) {
         RestTemplate restTemplate = new RestTemplate();
 
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity<AiRecommendRequestDto> requestEntity = new HttpEntity<>(headers);
-
         IndexApiResponseDto indexApiResponseDto;
 
         String API_URL;
@@ -99,15 +97,13 @@ public class RentIndexService {
         }
 
         try {
-
             String responseBody = restTemplate
-                    .exchange(API_URL, HttpMethod.GET, requestEntity, String.class).getBody();
+                    .exchange(API_URL, HttpMethod.GET, null, String.class).getBody();
 
             if (responseBody == null || responseBody.isBlank())
                 throw new BaseException(ErrorCode.EXTERNAL_API_ERROR, "외부 API로부터 응답을 받아오지 못했습니다.");
 
             indexApiResponseDto = objectMapper.readValue(responseBody, IndexApiResponseDto.class);
-
         } catch (ResourceAccessException e) {
             log.error("외부 API 연결 에러 - " + e.getMessage());
             throw new BaseException(ErrorCode.EXTERNAL_API_ERROR, "외부 API 연결에 실패했습니다.");
@@ -128,7 +124,7 @@ public class RentIndexService {
                 .filter(row -> row.getDate() != null)
                 .filter(row -> {
                     String date = row.getDate();
-                    return date.compareTo("202502") >=0 && date.compareTo("202602") <=0;
+                    return date.compareTo("202502") >=0 && date.compareTo("202606") <=0;
                 }).toList();
     }
 
