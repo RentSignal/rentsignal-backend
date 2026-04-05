@@ -39,8 +39,14 @@ public class LegalDongCsvReader {
                     continue;
                 }
 
-                // 데이터 형식 - 법정동 코드 / 시도명 / 시군구명 / 읍면동명 / 리명 / 순위 / 생성일자
+                // 데이터 형식 - 법정동 코드 / 시도명 / 시군구명 / 읍면동명 / 리명 / 순위 / 생성일자 / 삭제일자
                 String[] tokens = line.split(",", -1);
+
+                // 삭제 일자가 있는 데이터는 패스
+                String deletedAt = get(tokens, 7);
+                if (hasText(deletedAt)) {
+                    continue;
+                }
 
                 String code = get(tokens, 0);
                 String provinceName = get(tokens, 1);
@@ -66,6 +72,10 @@ public class LegalDongCsvReader {
         if (tokens.length <= index) // 데이터 깨짐 방지
             return "";
         return tokens[index].trim();
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 
 }
