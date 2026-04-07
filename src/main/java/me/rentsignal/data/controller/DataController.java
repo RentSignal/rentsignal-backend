@@ -1,10 +1,7 @@
 package me.rentsignal.data.controller;
 
 import lombok.RequiredArgsConstructor;
-import me.rentsignal.data.service.RegionDataService;
-import me.rentsignal.data.service.RentIndexService;
-import me.rentsignal.data.service.LegalDongImportService;
-import me.rentsignal.data.service.SentimentIndexService;
+import me.rentsignal.data.service.*;
 import me.rentsignal.global.response.BaseResponse;
 import me.rentsignal.global.security.CustomPrincipal;
 import me.rentsignal.locationInfo.entity.HousingType;
@@ -21,6 +18,7 @@ public class DataController {
     private final RegionDataService regionDataService;
     private final RentIndexService rentIndexService;
     private final SentimentIndexService sentimentIndexService;
+    private final SubwayIndexService subwayIndexService;
 
     @PostMapping("/legal-dong")
     public ResponseEntity<?> saveLegalDong(@AuthenticationPrincipal CustomPrincipal customPrincipal) {
@@ -44,6 +42,12 @@ public class DataController {
     @PostMapping("/consumer-sentiment-index")
     public ResponseEntity<?> saveConsumerSentimentIndex(@AuthenticationPrincipal CustomPrincipal customPrincipal) {
         sentimentIndexService.saveConsumerSentimentIndex(customPrincipal.getId());
+        return ResponseEntity.ok().body(BaseResponse.success(null));
+    }
+
+    @PostMapping("/subway-accessibility-index")
+    public ResponseEntity<?> saveSubwayAccessibilityIndex(@AuthenticationPrincipal CustomPrincipal customPrincipal) {
+        subwayIndexService.saveSubwayAccessibilityIndex(customPrincipal.getId());
         return ResponseEntity.ok().body(BaseResponse.success(null));
     }
 

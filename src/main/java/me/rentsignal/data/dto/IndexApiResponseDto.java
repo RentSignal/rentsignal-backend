@@ -27,11 +27,11 @@ public class IndexApiResponseDto {
 
         // areaName (도심권, 동북권 ..)
         @JsonProperty("CLS_NM")
-        private String areaGroup;
+        private String name;
 
         // (서울>강북지역>도심권)
         @JsonProperty("CLS_FULLNM")
-        private String areaName;
+        private String fullName;
 
         // 값
         @JsonProperty("DTA_VAL")
