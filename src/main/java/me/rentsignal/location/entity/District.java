@@ -35,11 +35,19 @@ public class District extends BaseTimeEntity {
     @OneToMany(mappedBy = "district")
     private List<Neighborhood> neighborhoods = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "region_id")
+    private Region region;
+
     @Builder
     public District(String name, String code, Province province) {
         this.name = name;
         this.code = code;
         this.province = province;
+    }
+
+    public void assignRegion(Region region) {
+        this.region = region;
     }
 
 }

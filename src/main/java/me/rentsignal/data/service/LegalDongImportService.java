@@ -1,7 +1,5 @@
 package me.rentsignal.data.service;
 
-import lombok.Builder;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import me.rentsignal.data.LegalDongCsvReader;
 import me.rentsignal.data.dto.LegalDongCsvRowDto;
@@ -43,12 +41,10 @@ public class LegalDongImportService {
         // 1. 편의를 위해 csv 한 행 -> LegalDongCsvRowDto로 변환
         List<LegalDongCsvRowDto> rows = legalDongCsvReader.read();
 
-        // 2. DB 조회 최소화를 위해 행정구역 레벨별로 map 생성
+        // 2. DB 조회 최소화를 위해 행정구역 레벨별 데이터를 code 기준으로 map 생성
         Map<String, Province> provinceMap = loadProvinceMap();
         Map<String, District> districtMap = loadDistrictMap();
-        NeighborhoodMaps neighborhoodMaps = loadNeighborhoodMaps();
-        Map<String, Neighborhood> neighborhoodCodeMap = neighborhoodMaps.getNeighborhoodCodeMap();
-        Map<String, Neighborhood> neighborhoodKeyMap = neighborhoodMaps.getNeighborhoodKeyMap();
+        Map<String, Neighborhood> neighborhoodMap = loadNeighborhoodMap();
         Map<String, Ri> riMap = loadRiMap();
 
         // 3. csv 한 줄씩 처리 -> 저장되어있지 않던 데이터는 저장
@@ -64,32 +60,31 @@ public class LegalDongImportService {
                 saveDistrict(row, provinceMap, districtMap);
             }
             else if (isNeighborhoodRow(row)) { // 읍/면/동 레벨
-                saveNeighborhood(row, provinceMap, districtMap, neighborhoodCodeMap, neighborhoodKeyMap);
+                saveNeighborhood(row, provinceMap, districtMap, neighborhoodMap);
             }
             else if (isRiRow(row)) { // 리 레벨
-                saveRi(row, provinceMap, districtMap, neighborhoodKeyMap, riMap);
+                saveRi(row, provinceMap, districtMap, neighborhoodMap, riMap);
             }
         }
     }
 
     // ---------- 행정구역 레벨별로 저장 ----------
 
-    private Province saveProvince(LegalDongCsvRowDto row, Map<String, Province> map) {
-        // 이미 해당 code의 Province가 존재할 경우 재사용
+    private void saveProvince(LegalDongCsvRowDto row, Map<String, Province> map) {
+        // 이미 해당 code의 Province가 존재할 경우 저장 필요 X
         Province province = map.get(row.getCode());
-        if (province != null) return province;
+        if (province != null) return;
 
         Province newProvince = provinceRepository.save(Province.builder()
                 .name(row.getProvinceName())
                 .code(row.getCode()).build());
 
         map.put(newProvince.getCode(), newProvince);
-        return newProvince;
     }
 
-    private District saveDistrict(LegalDongCsvRowDto row, Map<String, Province> provinceMap, Map<String, District> districtMap) {
+    private void saveDistrict(LegalDongCsvRowDto row, Map<String, Province> provinceMap, Map<String, District> districtMap) {
         District district = districtMap.get(row.getCode());
-        if (district != null) return district;
+        if (district != null) return;
 
         Province province = findProvinceByName(provinceMap, row.getProvinceName());
 
@@ -99,54 +94,37 @@ public class LegalDongImportService {
                 .province(province).build());
 
         districtMap.put(newDistrict.getCode(), newDistrict);
-        return newDistrict;
     }
 
-    private Neighborhood saveNeighborhood(LegalDongCsvRowDto row,
+    private void saveNeighborhood(LegalDongCsvRowDto row,
                                           Map<String, Province> provinceMap,
                                           Map<String, District> districtMap,
-                                          Map<String, Neighborhood> neighborhoodCodeMap,
-                                          Map<String, Neighborhood> neighborhoodKeyMap) {
-        Neighborhood neighborhoodByCode = neighborhoodCodeMap.get(row.getCode());
-        if (neighborhoodByCode != null) return neighborhoodByCode;
+                                          Map<String, Neighborhood> neighborhoodMap) {
+        Neighborhood neighborhood = neighborhoodMap.get(row.getCode());
+        if (neighborhood != null) return;
 
         Province province = findProvinceByName(provinceMap, row.getProvinceName());
         District district = findDistrictByNameAndProvince(districtMap, province, row.getDistrictName());
-
-        // 중복 (code는 다르고 같은 district 내 name이 동일한 경우)  방지를 위해 key 기준으로 한 번 더 체크
-        String key = neighborhoodKey(district, row.getNeighborhoodName());
-        Neighborhood neighborhoodByKey = neighborhoodKeyMap.get(key);
-        if (neighborhoodByKey != null) { // 중복일 경우
-            neighborhoodCodeMap.put(row.getCode(), neighborhoodByKey);
-            return neighborhoodByKey;
-        }
 
         Neighborhood newNeighborhood = neighborhoodRepository.save(Neighborhood.builder()
                 .name(row.getNeighborhoodName())
                 .code(row.getCode())
                 .district(district).build());
 
-        neighborhoodCodeMap.put(newNeighborhood.getCode(), newNeighborhood);
-        neighborhoodKeyMap.put(key, newNeighborhood);
-        return newNeighborhood;
+        neighborhoodMap.put(newNeighborhood.getCode(), newNeighborhood);
     }
 
-    private Ri saveRi(LegalDongCsvRowDto row,
+    private void saveRi(LegalDongCsvRowDto row,
                       Map<String, Province> provinceMap,
                       Map<String, District> districtMap,
-                      Map<String, Neighborhood> neighborhoodKeyMap,
+                      Map<String, Neighborhood> neighborhoodMap,
                       Map<String, Ri> riMap) {
         Ri ri = riMap.get(row.getCode());
-        if (ri != null) return ri;
+        if (ri != null) return;
 
         Province province = findProvinceByName(provinceMap, row.getProvinceName());
         District district = findDistrictByNameAndProvince(districtMap, province, row.getDistrictName());
-
-        String key = neighborhoodKey(district, row.getNeighborhoodName());
-        Neighborhood neighborhood = neighborhoodKeyMap.get(key);
-        if (neighborhood == null) {
-            throw new BaseException(ErrorCode.NEIGHBORHOOD_NOT_FOUND, "해당 읍/면/동을 찾을 수 없습니다. - " + district.getName() + " " + row.getNeighborhoodName());
-        }
+        Neighborhood neighborhood = findNeighborhoodByNameAndDistrict(neighborhoodMap, district, row.getNeighborhoodName());
 
         Ri newRi = riRepository.save(Ri.builder()
                 .name(row.getRiName())
@@ -154,7 +132,6 @@ public class LegalDongImportService {
                 .neighborhood(neighborhood).build());
 
         riMap.put(newRi.getCode(), newRi);
-        return newRi;
     }
 
 
@@ -172,6 +149,14 @@ public class LegalDongImportService {
                 .filter(d -> d.getName().equals(name))
                 .findFirst()
                 .orElseThrow(() -> new BaseException(ErrorCode.DISTRICT_NOT_FOUND, "해당 시/군/구를 찾을 수 없습니다. - " + province.getName() + " " + name));
+    }
+
+    private Neighborhood findNeighborhoodByNameAndDistrict(Map<String, Neighborhood> neighborhoodMap, District district, String name) {
+        return neighborhoodMap.values().stream()
+                .filter(n -> n.getDistrict().getId().equals(district.getId()))
+                .filter(n -> n.getName().equals(name))
+                .findFirst()
+                .orElseThrow(() -> new BaseException(ErrorCode.NEIGHBORHOOD_NOT_FOUND, "해당 읍/면/동을 찾을 수 없습니다. - " + district.getName() + " " + name));
     }
 
 
@@ -219,20 +204,9 @@ public class LegalDongImportService {
                 .collect(Collectors.toMap(District::getCode, d -> d));
     }
 
-    private NeighborhoodMaps loadNeighborhoodMaps() {
-        List<Neighborhood> all = neighborhoodRepository.findAll();
-
-        Map<String, Neighborhood> neighborhoodCodeMap = all.stream()
+    private Map<String, Neighborhood> loadNeighborhoodMap() {
+        return neighborhoodRepository.findAll().stream()
                 .collect(Collectors.toMap(Neighborhood::getCode, n -> n));
-
-        Map<String, Neighborhood> neighborhoodKeyMap = all.stream()
-                .collect(Collectors.toMap(
-                        n -> n.getDistrict().getId() + "|" + n.getName(),
-                        n -> n));
-
-        return NeighborhoodMaps.builder()
-                .neighborhoodCodeMap(neighborhoodCodeMap)
-                .neighborhoodKeyMap(neighborhoodKeyMap).build();
     }
 
     private Map<String, Ri> loadRiMap() {
@@ -240,23 +214,8 @@ public class LegalDongImportService {
                 .collect(Collectors.toMap(Ri::getCode, ri -> ri));
     }
 
-
     private boolean hasText(String value) {
         return value != null && !value.isBlank();
-    }
-
-    private String neighborhoodKey(District district, String name) {
-        return district.getId() + "|" + name;
-    }
-
-    @Data
-    @Builder
-    public static class NeighborhoodMaps {
-
-        private Map<String, Neighborhood> neighborhoodCodeMap;
-
-        private Map<String, Neighborhood> neighborhoodKeyMap;
-
     }
 
 }

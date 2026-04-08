@@ -7,6 +7,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
 @RestControllerAdvice
@@ -47,6 +48,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(ErrorCode.INVALID_INPUT_VALUE.getStatus())
                 .body(BaseResponse.error(ErrorCode.INVALID_INPUT_VALUE, message));
+    }
+
+    // RequestParam 타입 변환 실패한 경우
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<BaseResponse<?>> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+        log.error("MethodArgumentTypeMismatchException - " + e.getMessage());
+
+        return ResponseEntity
+                .status(ErrorCode.INVALID_INPUT_VALUE.getStatus())
+                .body(BaseResponse.error(ErrorCode.INVALID_INPUT_VALUE, "Request Param 타입 변환에 실패했습니다."));
     }
 
     @ExceptionHandler(Exception.class)

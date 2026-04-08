@@ -2,9 +2,13 @@ package me.rentsignal.location.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import me.rentsignal.global.entity.BaseTimeEntity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 권역 (ex. 강남 서남권, 강북 도심권)
@@ -12,11 +16,6 @@ import me.rentsignal.global.entity.BaseTimeEntity;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Table(
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        columnNames = {"province_id", "area_group", "area_name"})}
-)
 public class Region extends BaseTimeEntity {
 
     @Id
@@ -31,8 +30,22 @@ public class Region extends BaseTimeEntity {
     @Column(nullable = false, name = "area_name")
     private String areaName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "province_id", nullable = false)
-    private Province province;
+    @OneToMany(mappedBy = "region")
+    private List<District> districts = new ArrayList<>();
+
+    @Builder
+    public Region(String areaGroup, String areaName) {
+        this.areaGroup = areaGroup;
+        this.areaName = areaName;
+    }
+
+    public void addDistricts(List<District> districts) {
+        for (District district : districts) {
+            if (!this.districts.contains(district)) {
+                this.districts.add(district);
+            }
+            district.assignRegion(this);
+        }
+    }
 
 }
