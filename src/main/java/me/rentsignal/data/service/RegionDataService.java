@@ -9,8 +9,6 @@ import me.rentsignal.location.entity.Region;
 import me.rentsignal.location.repository.DistrictRepository;
 import me.rentsignal.location.repository.ProvinceRepository;
 import me.rentsignal.location.repository.RegionRepository;
-import me.rentsignal.user.entity.Role;
-import me.rentsignal.user.service.AuthService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,15 +18,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RegionDataService {
 
-    private final AuthService authService;
     private final DistrictRepository districtRepository;
     private final RegionRepository regionRepository;
     private final ProvinceRepository provinceRepository;
 
     @Transactional
-    public void saveRegion(Long userId) {
-        authService.validateUserAccess(userId, Role.ROLE_ADMIN);
-
+    public void saveRegion() {
         Province province = provinceRepository.findByName("서울특별시").orElseThrow(() ->
                 new BaseException(ErrorCode.PROVINCE_NOT_FOUND, "해당 시/도가 존재하지 않습니다. - 서울특별시"));
 

@@ -13,8 +13,6 @@ import me.rentsignal.location.repository.DistrictRepository;
 import me.rentsignal.location.repository.NeighborhoodRepository;
 import me.rentsignal.location.repository.ProvinceRepository;
 import me.rentsignal.location.repository.RiRepository;
-import me.rentsignal.user.entity.Role;
-import me.rentsignal.user.service.AuthService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,12 +30,9 @@ public class LegalDongImportService {
     private final DistrictRepository districtRepository;
     private final NeighborhoodRepository neighborhoodRepository;
     private final RiRepository riRepository;
-    private final AuthService authService;
 
     /** csv 파일 읽어서 법정동 데이터 (코드, 시/도, 시/군/구, 읍/면/동, 리) 저장 */
-    public void importLegalDongCsv(Long userId) {
-        authService.validateUserAccess(userId, Role.ROLE_ADMIN);
-
+    public void importLegalDongCsv() {
         // 1. 편의를 위해 csv 한 행 -> LegalDongCsvRowDto로 변환
         List<LegalDongCsvRowDto> rows = legalDongCsvReader.read();
 

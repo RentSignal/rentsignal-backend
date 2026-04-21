@@ -10,8 +10,6 @@ import me.rentsignal.location.entity.District;
 import me.rentsignal.location.repository.DistrictRepository;
 import me.rentsignal.locationInfo.entity.DistrictIndex;
 import me.rentsignal.locationInfo.repository.DistrictIndexRepository;
-import me.rentsignal.user.entity.Role;
-import me.rentsignal.user.service.AuthService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpMethod;
@@ -39,12 +37,9 @@ public class SubwayIndexService {
     private final ObjectMapper objectMapper;
     private final DistrictIndexRepository districtIndexRepository;
     private final DistrictRepository districtRepository;
-    private final AuthService authService;
 
     @Transactional
-    public void saveSubwayAccessibilityIndex(Long userId) {
-        authService.validateUserAccess(userId, Role.ROLE_ADMIN);
-
+    public void saveSubwayAccessibilityIndex() {
         // 1. 외부 API에서 지하철 역세권 지수 데이터 조회
         List<IndexApiResponseDto.Row> rows = getSubwayIndexRows();
 
