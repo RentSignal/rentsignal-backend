@@ -10,6 +10,9 @@ sourceCompatibility = '17'
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://repo.osgeo.org/repository/release/")
+    }
 }
 
 dependencies {
@@ -29,6 +32,11 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    // GeoTools
+    implementation 'org.geotools:gt-main:34.0'
+    implementation 'org.geotools:gt-referencing:34.0'
+    implementation 'org.geotools:gt-epsg-hsql:34.0'
 }
 
 test {
