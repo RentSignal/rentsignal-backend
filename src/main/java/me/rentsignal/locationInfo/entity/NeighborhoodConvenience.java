@@ -2,6 +2,7 @@ package me.rentsignal.locationInfo.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import me.rentsignal.global.entity.BaseTimeEntity;
@@ -15,6 +16,11 @@ import java.math.BigDecimal;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Table(
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"neighborhood_id", "name"}
+        )
+)
 public class NeighborhoodConvenience extends BaseTimeEntity {
 
     @Id
@@ -32,10 +38,19 @@ public class NeighborhoodConvenience extends BaseTimeEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false, precision = 10, scale = 7)
-    private BigDecimal latitude;
+    @Column(nullable = false)
+    private Double latitude;
 
-    @Column(nullable = false, precision = 10, scale = 7)
-    private BigDecimal longitude;
+    @Column(nullable = false)
+    private Double longitude;
+
+    @Builder
+    public NeighborhoodConvenience(Neighborhood neighborhood, String type, String name, Double latitude, Double longitude) {
+        this.neighborhood = neighborhood;
+        this.type = type;
+        this.name = name;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 
 }

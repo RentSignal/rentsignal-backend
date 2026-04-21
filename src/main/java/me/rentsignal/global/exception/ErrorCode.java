@@ -26,6 +26,7 @@ public enum ErrorCode {
     CSV_READ_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "CSV 읽기에 실패했습니다."),
     INVALID_HOUSING_TYPE(HttpStatus.NOT_FOUND, "잘못된 housing type입니다."),
     DUPLICATED_DATA(HttpStatus.CONFLICT, "이미 존재하는 데이터입니다."),
+    CONVERT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "위도/경도 변환에 실패했습니다."),
 
     // 지역 관련
     PROVINCE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 시/도를 찾을 수 없습니다."),

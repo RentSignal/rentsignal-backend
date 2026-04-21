@@ -32,7 +32,7 @@ public class SubwayIndexService {
     @Value("${SUBWAY_ACCESSIBILITY_INDEX_API_URL}")
     private String SUBWAY_ACCESSIBILITY_INDEX_API_URL;
 
-    private static final List<String> CITIES = List.of("성남", "수원", "안양", "고양", "용인", "부천", "안산", "천안", "화성");
+    public static final List<String> CITIES = List.of("성남", "수원", "안양", "고양", "용인", "부천", "안산", "천안", "화성", "창원", "포항", "전주", "청주");
 
     private final ObjectMapper objectMapper;
     private final DistrictIndexRepository districtIndexRepository;
