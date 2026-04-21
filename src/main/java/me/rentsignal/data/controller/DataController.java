@@ -3,10 +3,8 @@ package me.rentsignal.data.controller;
 import lombok.RequiredArgsConstructor;
 import me.rentsignal.data.service.*;
 import me.rentsignal.global.response.BaseResponse;
-import me.rentsignal.global.security.CustomPrincipal;
 import me.rentsignal.locationInfo.entity.HousingType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,33 +19,32 @@ public class DataController {
     private final SubwayIndexService subwayIndexService;
 
     @PostMapping("/legal-dong")
-    public ResponseEntity<?> saveLegalDong(@AuthenticationPrincipal CustomPrincipal customPrincipal) {
-        legalDongImportService.importLegalDongCsv(customPrincipal.getId());
+    public ResponseEntity<?> saveLegalDong() {
+        legalDongImportService.importLegalDongCsv();
         return ResponseEntity.ok().body(BaseResponse.success(null));
     }
 
     @PostMapping("/region")
-    public ResponseEntity<?> saveRegion(@AuthenticationPrincipal CustomPrincipal customPrincipal) {
-        regionDataService.saveRegion(customPrincipal.getId());
+    public ResponseEntity<?> saveRegion() {
+        regionDataService.saveRegion();
         return ResponseEntity.ok().body(BaseResponse.success(null));
     }
 
     @PostMapping("/rent-index")
-    public ResponseEntity<?> saveRentIndex(@AuthenticationPrincipal CustomPrincipal customPrincipal,
-                                           @RequestParam HousingType housingType) {
-        rentIndexService.saveRentCompositeIndex(customPrincipal.getId(), housingType);
+    public ResponseEntity<?> saveRentIndex(@RequestParam HousingType housingType) {
+        rentIndexService.saveRentCompositeIndex(housingType);
         return ResponseEntity.ok().body(BaseResponse.success(null));
     }
 
     @PostMapping("/consumer-sentiment-index")
-    public ResponseEntity<?> saveConsumerSentimentIndex(@AuthenticationPrincipal CustomPrincipal customPrincipal) {
-        sentimentIndexService.saveConsumerSentimentIndex(customPrincipal.getId());
+    public ResponseEntity<?> saveConsumerSentimentIndex() {
+        sentimentIndexService.saveConsumerSentimentIndex();
         return ResponseEntity.ok().body(BaseResponse.success(null));
     }
 
     @PostMapping("/subway-accessibility-index")
-    public ResponseEntity<?> saveSubwayAccessibilityIndex(@AuthenticationPrincipal CustomPrincipal customPrincipal) {
-        subwayIndexService.saveSubwayAccessibilityIndex(customPrincipal.getId());
+    public ResponseEntity<?> saveSubwayAccessibilityIndex() {
+        subwayIndexService.saveSubwayAccessibilityIndex();
         return ResponseEntity.ok().body(BaseResponse.success(null));
     }
 

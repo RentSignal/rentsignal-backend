@@ -11,8 +11,6 @@ import me.rentsignal.location.repository.RegionRepository;
 import me.rentsignal.locationInfo.entity.HousingType;
 import me.rentsignal.locationInfo.entity.RegionIndex;
 import me.rentsignal.locationInfo.repository.RegionIndexRepository;
-import me.rentsignal.user.entity.Role;
-import me.rentsignal.user.service.AuthService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.*;
@@ -41,12 +39,9 @@ public class RentIndexService {
 
     private final RegionIndexRepository regionIndexRepository;
     private final RegionRepository regionRepository;
-    private final AuthService authService;
 
     @Transactional
-    public void saveRentCompositeIndex(Long userId, HousingType housingType) {
-        authService.validateUserAccess(userId, Role.ROLE_ADMIN);
-
+    public void saveRentCompositeIndex(HousingType housingType) {
         // 서울 > 강북지역 > 도심권
         Region northCentral = findRegionByAreaGroupAndAreaName("강북", "도심권");
         saveRegionIndex(northCentral, housingType,

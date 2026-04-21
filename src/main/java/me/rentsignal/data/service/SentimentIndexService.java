@@ -10,8 +10,6 @@ import me.rentsignal.location.entity.Province;
 import me.rentsignal.location.repository.ProvinceRepository;
 import me.rentsignal.locationInfo.entity.ProvinceIndex;
 import me.rentsignal.locationInfo.repository.ProvinceIndexRepository;
-import me.rentsignal.user.entity.Role;
-import me.rentsignal.user.service.AuthService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpMethod;
@@ -29,7 +27,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SentimentIndexService {
 
-    private final AuthService authService;
     private final ProvinceRepository provinceRepository;
     private final ProvinceIndexRepository provinceIndexRepository;
     private final ObjectMapper objectMapper;
@@ -38,9 +35,7 @@ public class SentimentIndexService {
     private String CONSUMER_SENTIMENT_INDEX_API_URL;
 
     @Transactional
-    public void saveConsumerSentimentIndex(Long userId) {
-        authService.validateUserAccess(userId, Role.ROLE_ADMIN);
-
+    public void saveConsumerSentimentIndex() {
         RestTemplate restTemplate = new RestTemplate();
 
         List<SentimentIndexApiResponseDto> indexList;
