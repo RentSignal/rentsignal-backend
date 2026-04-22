@@ -1,9 +1,9 @@
 package me.rentsignal.data.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.rentsignal.data.dto.IndexApiResponseDto;
+import me.rentsignal.data.external.ExternalApiClient;
 import me.rentsignal.global.exception.BaseException;
 import me.rentsignal.global.exception.ErrorCode;
 import me.rentsignal.location.entity.Region;
@@ -13,11 +13,8 @@ import me.rentsignal.locationInfo.entity.RegionIndex;
 import me.rentsignal.locationInfo.repository.RegionIndexRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestTemplate;
 
 import java.math.RoundingMode;
 import java.util.List;
@@ -30,7 +27,6 @@ import java.util.List;
  */
 public class RentIndexService {
 
-    private final ObjectMapper objectMapper;
     @Value("${VILLA_RENT_INDEX_API_URL}")
     private String VILLA_RENT_INDEX_API_URL;
 
@@ -39,6 +35,7 @@ public class RentIndexService {
 
     private final RegionIndexRepository regionIndexRepository;
     private final RegionRepository regionRepository;
+    private final ExternalApiClient externalApiClient;
 
     @Transactional
     public void saveRentCompositeIndex(HousingType housingType) {
@@ -70,18 +67,14 @@ public class RentIndexService {
 
     }
 
-    // 권역 조회
+    /** 권역 조회 */
     private Region findRegionByAreaGroupAndAreaName(String areaGroup, String areaName) {
         return regionRepository.findByAreaGroupAndAreaName(areaGroup, areaName)
                 .orElseThrow(() -> new BaseException(ErrorCode.REGION_NOT_FOUND, "해당 권역을 찾을 수 없습니다. - " + areaGroup + " " + areaName));
     }
 
-    // 1년 전까지의 전월세 통합지수 조회
+    /** 1년 전까지의 전월세 통합지수 조회 */
     private List<IndexApiResponseDto.Row> getFilteredRentIndex(String classificationId, HousingType housingType) {
-        RestTemplate restTemplate = new RestTemplate();
-
-        IndexApiResponseDto indexApiResponseDto;
-
         String API_URL;
         if (housingType == HousingType.APARTMENT) {
             API_URL = APT_RENT_INDEX_API_URL + classificationId;
@@ -91,23 +84,7 @@ public class RentIndexService {
             throw new BaseException(ErrorCode.INVALID_HOUSING_TYPE, "잘못된 housing type입니다. - " + housingType.name());
         }
 
-        try {
-            String responseBody = restTemplate
-                    .exchange(API_URL, HttpMethod.GET, null, String.class).getBody();
-
-            if (responseBody == null || responseBody.isBlank())
-                throw new BaseException(ErrorCode.EXTERNAL_API_ERROR, "외부 API로부터 응답을 받아오지 못했습니다.");
-
-            indexApiResponseDto = objectMapper.readValue(responseBody, IndexApiResponseDto.class);
-        } catch (ResourceAccessException e) {
-            log.error("외부 API 연결 에러 - " + e.getMessage());
-            throw new BaseException(ErrorCode.EXTERNAL_API_ERROR, "외부 API 연결에 실패했습니다.");
-        } catch (BaseException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("외부 API 에러 - " + e.getMessage());
-            throw new BaseException(ErrorCode.EXTERNAL_API_ERROR, "외부 API에서 알 수 없는 오류가 발생했습니다.");
-        }
+        IndexApiResponseDto indexApiResponseDto = externalApiClient.getResponse(API_URL, IndexApiResponseDto.class);
 
         List<IndexApiResponseDto.Row> rows = indexApiResponseDto.getSttsApiTblData().stream()
                 .filter(data -> data.getRow() != null)

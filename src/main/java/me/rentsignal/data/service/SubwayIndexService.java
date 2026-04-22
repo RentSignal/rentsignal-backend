@@ -1,9 +1,9 @@
 package me.rentsignal.data.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.rentsignal.data.dto.IndexApiResponseDto;
+import me.rentsignal.data.external.ExternalApiClient;
 import me.rentsignal.global.exception.BaseException;
 import me.rentsignal.global.exception.ErrorCode;
 import me.rentsignal.location.entity.District;
@@ -12,11 +12,8 @@ import me.rentsignal.locationInfo.entity.DistrictIndex;
 import me.rentsignal.locationInfo.repository.DistrictIndexRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -34,9 +31,9 @@ public class SubwayIndexService {
 
     public static final List<String> CITIES = List.of("성남", "수원", "안양", "고양", "용인", "부천", "안산", "천안", "화성", "창원", "포항", "전주", "청주");
 
-    private final ObjectMapper objectMapper;
     private final DistrictIndexRepository districtIndexRepository;
     private final DistrictRepository districtRepository;
+    private final ExternalApiClient externalApiClient;
 
     @Transactional
     public void saveSubwayAccessibilityIndex() {
@@ -90,27 +87,7 @@ public class SubwayIndexService {
 
     // 외부 API 호출해 데이터 조회 후 Row에 매핑
     private List<IndexApiResponseDto.Row> getSubwayIndexRows() {
-        RestTemplate restTemplate = new RestTemplate();
-
-        IndexApiResponseDto indexApiResponseDto;
-
-        try {
-            String responseBody = restTemplate
-                    .exchange(SUBWAY_ACCESSIBILITY_INDEX_API_URL, HttpMethod.GET, null, String.class).getBody();
-
-            if (responseBody == null || responseBody.isBlank())
-                throw new BaseException(ErrorCode.EXTERNAL_API_ERROR, "외부 API로부터 응답을 받아오지 못했습니다.");
-
-            indexApiResponseDto = objectMapper.readValue(responseBody, IndexApiResponseDto.class);
-        } catch (ResourceAccessException e) {
-            log.error("외부 API 연결 에러 - " + e.getMessage());
-            throw new BaseException(ErrorCode.EXTERNAL_API_ERROR, "외부 API 연결에 실패했습니다.");
-        } catch (BaseException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("외부 API 에러 - " + e.getMessage());
-            throw new BaseException(ErrorCode.EXTERNAL_API_ERROR, "외부 API에서 알 수 없는 오류가 발생했습니다.");
-        }
+        IndexApiResponseDto indexApiResponseDto = externalApiClient.getResponse(SUBWAY_ACCESSIBILITY_INDEX_API_URL, IndexApiResponseDto.class);
 
         return indexApiResponseDto.getSttsApiTblData().stream()
                 .filter(data -> data.getRow() != null)

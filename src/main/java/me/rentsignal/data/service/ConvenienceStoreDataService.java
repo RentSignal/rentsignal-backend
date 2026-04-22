@@ -1,9 +1,9 @@
 package me.rentsignal.data.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.rentsignal.data.dto.ConvenienceStoreApiResponseDto;
+import me.rentsignal.data.external.ExternalApiClient;
 import me.rentsignal.global.exception.BaseException;
 import me.rentsignal.global.exception.ErrorCode;
 import me.rentsignal.location.entity.District;
@@ -22,10 +22,8 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.Normalizer;
@@ -42,10 +40,10 @@ public class ConvenienceStoreDataService {
     private final ProvinceRepository provinceRepository;
     private final DistrictRepository districtRepository;
     private final NeighborhoodRepository neighborhoodRepository;
-    private final ObjectMapper objectMapper;
+    private final NeighborhoodConvenienceRepository neighborhoodConvenienceRepository;
+    private final ExternalApiClient externalApiClient;
 
     private static final GeometryFactory geometryFactory = new GeometryFactory();
-    private final NeighborhoodConvenienceRepository neighborhoodConvenienceRepository;
     private static final MathTransform transform = createTransfrom();
 
     @Value("${CONVENIENCE_STORE_API_URL}")
@@ -60,34 +58,19 @@ public class ConvenienceStoreDataService {
         Map<String, District> districtMap = loadDistrictKeyMap();
         Map<String, Neighborhood> neighborhoodMap = loadNeighborhoodKeyMap();
 
+        Set<String> convenienceStoreKeySet = neighborhoodConvenienceRepository.findAll().stream()
+                .map(c -> convenienceStoreKey(c.getName(), c.getNeighborhood()))
+                .collect(Collectors.toSet());
+
         // 편의점 데이터 총 54342개, 한 페이지 최대 데이터 개수 1000개 -> 55번 반복
         for (int i = 0; i < 55; i++) {
             System.out.println((i+1) + "번째 페이지 조회 중 ..");
 
-            ConvenienceStoreApiResponseDto convenienceStoreApiResponseDto;
-            try {
-                String responseBody = restTemplate
-                        .exchange(CONVENIENCE_STORE_API_URL + (i+1), HttpMethod.GET, null, String.class).getBody();
-
-                if (responseBody == null || responseBody.isBlank())
-                    throw new BaseException(ErrorCode.EXTERNAL_API_ERROR, "외부 API로부터 응답을 받아오지 못했습니다.");
-
-                convenienceStoreApiResponseDto = objectMapper.readValue(responseBody, ConvenienceStoreApiResponseDto.class);
-            } catch (ResourceAccessException e) {
-                log.error("외부 API 연결 에러 - " + e.getMessage());
-                throw new BaseException(ErrorCode.EXTERNAL_API_ERROR, "외부 API 연결에 실패했습니다.");
-            } catch (BaseException e) {
-                throw e;
-            } catch (Exception e) {
-                log.error("외부 API 에러 - " + e.getMessage());
-                throw new BaseException(ErrorCode.EXTERNAL_API_ERROR, "외부 API에서 알 수 없는 오류가 발생했습니다.");
-            }
+            // API에 요청
+            ConvenienceStoreApiResponseDto convenienceStoreApiResponseDto =
+                    externalApiClient.getResponse(CONVENIENCE_STORE_API_URL + (i + 1), ConvenienceStoreApiResponseDto.class);
 
             List<ConvenienceStoreApiResponseDto.Item> stores = convenienceStoreApiResponseDto.getBody().getItems().getItem();
-
-            Set<String> convenienceStoreKeySet = neighborhoodConvenienceRepository.findAll().stream()
-                    .map(c -> convenienceStoreKey(c.getName(), c.getNeighborhood()))
-                    .collect(Collectors.toSet());
 
             // 페이지 내 모든 편의점 저장
             for (ConvenienceStoreApiResponseDto.Item item : stores) {
