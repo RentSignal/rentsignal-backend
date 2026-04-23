@@ -10,7 +10,6 @@ import me.rentsignal.global.exception.ErrorCode;
 import me.rentsignal.location.entity.Neighborhood;
 import me.rentsignal.location.entity.NeighborhoodBoundary;
 import me.rentsignal.location.repository.NeighborhoodBoundaryRepository;
-import me.rentsignal.location.repository.NeighborhoodRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,18 +27,20 @@ public class NeighborhoodBoundaryDataService {
     private String VWORLD_API_BASE_URL;
 
     private final NeighborhoodBoundaryRepository neighborhoodBoundaryRepository;
-    private final NeighborhoodRepository neighborhoodRepository;
     private final ObjectMapper objectMapper;
     private final ExternalApiClient externalApiClient;
 
-    // 대한민국을 덮는 최소 bounding box를 3x2으로 분할
+    // 대한민국을 덮는 최소 bounding box를 3x3으로 분할
     private static final List<String> GEOM_FILTERS = List.of(
-            "BOX(124, 33, 126.5, 35.5)",
-            "BOX(126.5, 33, 129, 35.5)",
-            "BOX(124, 35.5, 126.5, 37.5)",
-            "BOX(126.5, 35.5, 129, 37.5)",
-            "BOX(124, 37.5, 126.5, 39.5)",
-            "BOX(126.5, 37.5, 129, 39.5)"
+            "BOX(124, 33, 126.67, 36.5)",
+            "BOX(126.67, 33, 129.33, 36.5)",
+            "BOX(129.33, 33, 132, 36.5)",
+            "BOX(124, 36.5, 126.67, 40)",
+            "BOX(126.67, 36.5, 129.33, 40)",
+            "BOX(129.33, 36.5, 132, 40)",
+            "BOX(124, 40, 126.67, 43)",
+            "BOX(126.67, 40, 129.33, 43)",
+            "BOX(129.33, 40, 132, 43)"
     );
 
     /** 좌표 -> 읍면동 매핑 위해 vworld API에서 읍면동 경계 데이터 조회 후 저장 */
@@ -122,7 +123,6 @@ public class NeighborhoodBoundaryDataService {
 
         Neighborhood neighborhood = neighborhoodMap.get(legalDongCode);
         if (neighborhood == null) {
-            //throw new BaseException(ErrorCode.NEIGHBORHOOD_NOT_FOUND, "해당 코드의 읍면동이 존재하지 않습니다. - " + emdCode + ", " + fullName);
             log.warn("해당 코드의 읍면동이 존재하지 않습니다. - {}, {}", emdCode, fullName);
             return null;
         }
