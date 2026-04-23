@@ -24,7 +24,6 @@ import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import java.text.Normalizer;
 import java.util.List;
@@ -52,8 +51,6 @@ public class ConvenienceStoreDataService {
     /** 편의시설 - 편의점 저장 */
     @Transactional
     public void saveConvenienceStore() {
-        RestTemplate restTemplate = new RestTemplate();
-
         Map<String, Province> provinceMap = loadProvinceNameMap();
         Map<String, District> districtMap = loadDistrictKeyMap();
         Map<String, Neighborhood> neighborhoodMap = loadNeighborhoodKeyMap();
@@ -64,7 +61,7 @@ public class ConvenienceStoreDataService {
 
         // 편의점 데이터 총 54342개, 한 페이지 최대 데이터 개수 1000개 -> 55번 반복
         for (int i = 0; i < 55; i++) {
-            System.out.println((i+1) + "번째 페이지 조회 중 ..");
+            log.info((i+1) + "번째 페이지 조회 중 ..");
 
             // API에 요청
             ConvenienceStoreApiResponseDto convenienceStoreApiResponseDto =

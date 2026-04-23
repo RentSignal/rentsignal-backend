@@ -199,7 +199,7 @@ public class LegalDongImportService {
                 .collect(Collectors.toMap(District::getCode, d -> d));
     }
 
-    private Map<String, Neighborhood> loadNeighborhoodMap() {
+    public Map<String, Neighborhood> loadNeighborhoodMap() {
         return neighborhoodRepository.findAll().stream()
                 .collect(Collectors.toMap(Neighborhood::getCode, n -> n));
     }
