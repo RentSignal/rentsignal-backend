@@ -37,6 +37,9 @@ dependencies {
     implementation 'org.geotools:gt-main:34.0'
     implementation 'org.geotools:gt-referencing:34.0'
     implementation 'org.geotools:gt-epsg-hsql:34.0'
+
+    // OpenCSV
+    implementation 'com.opencsv:opencsv:5.9'
 }
 
 test {
