@@ -1,6 +1,7 @@
 package me.rentsignal.data.controller;
 
 import lombok.RequiredArgsConstructor;
+import me.rentsignal.data.service.BusStopDataImportService;
 import me.rentsignal.data.service.ConvenienceStoreDataService;
 import me.rentsignal.data.service.NeighborhoodBoundaryDataService;
 import me.rentsignal.global.response.BaseResponse;
@@ -16,6 +17,7 @@ public class LifeStyleFactorDataCollector {
 
     private final ConvenienceStoreDataService convenienceStoreDataService;
     private final NeighborhoodBoundaryDataService neighborhoodBoundaryDataService;
+    private final BusStopDataImportService busStopDataImportService;
 
     @PostMapping("/convenience-store")
     public ResponseEntity<?> saveConvenienceStore() {
@@ -26,6 +28,12 @@ public class LifeStyleFactorDataCollector {
     @PostMapping("/neighborhood-boundary")
     public ResponseEntity<?> saveNeighborhoodBoundary() {
         neighborhoodBoundaryDataService.saveNeighborhoodBoundaries();
+        return ResponseEntity.ok().body(BaseResponse.success(null));
+    }
+
+    @PostMapping("/bus-stop")
+    public ResponseEntity<?> saveBusStop() {
+        busStopDataImportService.importBusStopCsv();
         return ResponseEntity.ok().body(BaseResponse.success(null));
     }
 
