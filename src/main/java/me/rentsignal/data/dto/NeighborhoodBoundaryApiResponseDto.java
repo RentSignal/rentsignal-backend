@@ -39,6 +39,7 @@ public class NeighborhoodBoundaryApiResponseDto {
 
     @Data
     public static class GeometryDto {
+        private String type;
         private List<List<List<List<Double>>>> coordinates;
     }
 
