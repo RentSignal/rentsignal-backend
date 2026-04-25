@@ -41,6 +41,12 @@ public class BusStopCsvReader {
                     continue;
                 }
 
+                // 서울 데이터만 저장 시
+//                String province = line[7] == null ? "" : line[7].trim();
+//                if (!province.equals("서울특별시")) {
+//                    continue;
+//                }
+
                 String name = line[1];
                 String latitudeText = line[2] == null ? "" : line[2].trim();
                 String longitudeText = line[3] == null ? "" : line[3].trim();
