@@ -40,6 +40,9 @@ dependencies {
 
     // OpenCSV
     implementation 'com.opencsv:opencsv:5.9'
+
+    // JTS
+    implementation 'org.locationtech.jts:jts-core:1.19.0'
 }
 
 test {
