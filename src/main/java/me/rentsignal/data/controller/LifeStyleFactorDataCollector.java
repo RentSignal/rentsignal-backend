@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import me.rentsignal.data.service.BusStopDataImportService;
 import me.rentsignal.data.service.ConvenienceStoreDataService;
 import me.rentsignal.data.service.NeighborhoodBoundaryDataService;
+import me.rentsignal.data.service.TransportNeighborhoodMappingService;
 import me.rentsignal.global.response.BaseResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +19,7 @@ public class LifeStyleFactorDataCollector {
     private final ConvenienceStoreDataService convenienceStoreDataService;
     private final NeighborhoodBoundaryDataService neighborhoodBoundaryDataService;
     private final BusStopDataImportService busStopDataImportService;
+    private final TransportNeighborhoodMappingService transportNeighborhoodMappingService;
 
     @PostMapping("/convenience-store")
     public ResponseEntity<?> saveConvenienceStore() {
@@ -35,6 +37,12 @@ public class LifeStyleFactorDataCollector {
     public ResponseEntity<?> saveBusStop() {
         busStopDataImportService.importBusStopCsv();
         return ResponseEntity.ok().body(BaseResponse.success(null));
+    }
+
+    @PostMapping("/bus-stop-neighborhood-map")
+    public ResponseEntity<?> mapBusStopNeighborhood() {
+        int total = transportNeighborhoodMappingService.mapBusStopNeighborhood();
+        return ResponseEntity.ok().body(BaseResponse.success(total));
     }
 
 }
