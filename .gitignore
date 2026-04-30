@@ -8,6 +8,7 @@ build/
 .env
 **/src/main/resources/legal-dong-code.csv
 **/src/main/resources/bus-stop.csv
+**/src/main/resources/subway.csv
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
