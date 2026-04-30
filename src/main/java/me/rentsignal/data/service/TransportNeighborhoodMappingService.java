@@ -28,7 +28,7 @@ public class TransportNeighborhoodMappingService {
             new GeometryFactory(new PrecisionModel(), 4326);
     private final Double MAX_DISTANCE = 0.004;
 
-    public int mapBusStopNeighborhood() {
+    public int mapTransportNeighborhood() {
         // JTS 공간 인덱스 생성
         BoundaryIndex boundaryIndex = loadBoundaryIndex();
 
@@ -45,7 +45,7 @@ public class TransportNeighborhoodMappingService {
             lastId = result.lastId();
             total += result.updatedCount();
 
-            log.info("마지막 정류장 id = " + lastId + ", 총 업데이트 수 = " + total);
+            log.info("마지막 정류장/역 id = " + lastId + ", 총 업데이트 수 = " + total);
         }
 
         return total;
