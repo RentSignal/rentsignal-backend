@@ -1,7 +1,7 @@
 package me.rentsignal.data.service;
 
 import lombok.RequiredArgsConstructor;
-import me.rentsignal.data.LegalDongCsvReader;
+import me.rentsignal.data.reader.LegalDongCsvReader;
 import me.rentsignal.data.dto.LegalDongCsvRowDto;
 import me.rentsignal.global.exception.BaseException;
 import me.rentsignal.global.exception.ErrorCode;
