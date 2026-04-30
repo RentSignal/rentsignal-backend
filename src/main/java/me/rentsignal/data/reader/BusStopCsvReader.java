@@ -1,4 +1,4 @@
-package me.rentsignal.data;
+package me.rentsignal.data.reader;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
