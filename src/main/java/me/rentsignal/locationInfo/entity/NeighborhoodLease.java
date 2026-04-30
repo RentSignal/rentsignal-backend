@@ -4,18 +4,17 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import me.rentsignal.global.entity.BaseTimeEntity;
 import me.rentsignal.location.entity.Neighborhood;
 
 import java.math.BigDecimal;
 
 /**
- * 읍/면/동 기준 생활요소 (치안, 비용)
+ * 읍/면/동 기준 월세/전세
  */
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class NeighborhoodLifeStyleFactor extends BaseTimeEntity {
+public class NeighborhoodLease {
 
     @Id
     @GeneratedValue(strategy =  GenerationType.IDENTITY)
@@ -26,14 +25,17 @@ public class NeighborhoodLifeStyleFactor extends BaseTimeEntity {
     private Neighborhood neighborhood;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private FactorType factorType;
-
-    // factorType이 COST가 아닌 경우 Null
-    @Enumerated(EnumType.STRING)
     private LeaseType leaseType;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal value;
+    private BigDecimal deposit;
+
+    // LeaseType == JEONSE인 경우 null
+    @Column(precision = 10, scale = 2)
+    private BigDecimal monthlyRent;
+
+    // 면적 (m2)
+    @Column(precision = 10, scale = 2)
+    private BigDecimal areaM2;
 
 }
