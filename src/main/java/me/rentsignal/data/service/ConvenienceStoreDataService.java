@@ -12,6 +12,7 @@ import me.rentsignal.location.entity.Province;
 import me.rentsignal.location.repository.DistrictRepository;
 import me.rentsignal.location.repository.NeighborhoodRepository;
 import me.rentsignal.location.repository.ProvinceRepository;
+import me.rentsignal.locationInfo.entity.ConvenienceType;
 import me.rentsignal.locationInfo.entity.NeighborhoodConvenience;
 import me.rentsignal.locationInfo.repository.NeighborhoodConvenienceRepository;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
@@ -105,7 +106,11 @@ public class ConvenienceStoreDataService {
                         continue;
                     }
                     district = findDistrictByNameAndProvince(districtMap, province, convertedName);
-                    neighborhood = findNeighborhoodByNameAndDistrict(neighborhoodMap, district, arr[3]);
+                    String neighborhoodName = arr[3];
+                    if ("양지면".equals(neighborhoodName)) {
+                        neighborhoodName = "양지읍";
+                    }
+                    neighborhood = findNeighborhoodByNameAndDistrict(neighborhoodMap, district, neighborhoodName);
                 }
 
                 // 동일 neighborhood의 동일 이름 가게인지 확인
@@ -113,7 +118,7 @@ public class ConvenienceStoreDataService {
 
                 String key = convenienceStoreKey(storeName, neighborhood);
                 if (convenienceStoreKeySet.contains(key)) {
-                    log.info("이미 저장된 편의점입니다. - " + item.getFacilityName());
+                    //log.info("이미 저장된 편의점입니다. - " + item.getFacilityName());
                     continue;
                 }
 
@@ -128,7 +133,7 @@ public class ConvenienceStoreDataService {
                 // 편의점 저장
                 neighborhoodConvenienceRepository.save(NeighborhoodConvenience.builder()
                         .name(storeName)
-                        .type("편의점")
+                        .type(ConvenienceType.CONVENIENCE_STORE)
                         .neighborhood(neighborhood)
                         .latitude(latLng.get(0))
                         .longitude(latLng.get(1)).build());
