@@ -32,8 +32,9 @@ public class NeighborhoodConvenience extends BaseTimeEntity {
     private Neighborhood neighborhood;
 
     // 병원, 편의점, 카페, 마트 등
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String type;
+    private ConvenienceType type;
 
     @Column(nullable = false)
     private String name;
@@ -45,7 +46,7 @@ public class NeighborhoodConvenience extends BaseTimeEntity {
     private Double longitude;
 
     @Builder
-    public NeighborhoodConvenience(Neighborhood neighborhood, String type, String name, Double latitude, Double longitude) {
+    public NeighborhoodConvenience(Neighborhood neighborhood, ConvenienceType type, String name, Double latitude, Double longitude) {
         this.neighborhood = neighborhood;
         this.type = type;
         this.name = name;
