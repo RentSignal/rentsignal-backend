@@ -18,6 +18,7 @@ public class LifeStyleFactorDataCollector {
     private final BusStopDataImportService busStopDataImportService;
     private final TransportNeighborhoodMappingService transportNeighborhoodMappingService;
     private final SubwayDataService subwayDataService;
+    private final ConvenienceDataService convenienceDataService;
 
     @PostMapping("/convenience-store")
     public ResponseEntity<?> saveConvenienceStore() {
@@ -47,6 +48,12 @@ public class LifeStyleFactorDataCollector {
     public ResponseEntity<?> saveAndMapSubway() {
         int total = subwayDataService.importAndMapSubwayCsv();
         return ResponseEntity.ok().body(BaseResponse.success(total));
+    }
+
+    @PostMapping("/convenience")
+    public ResponseEntity<?> saveConvenience() {
+        convenienceDataService.saveConvenience();
+        return ResponseEntity.ok().body(BaseResponse.success(null));
     }
 
 }
