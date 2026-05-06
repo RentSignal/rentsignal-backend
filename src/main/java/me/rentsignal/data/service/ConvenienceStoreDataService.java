@@ -42,6 +42,7 @@ public class ConvenienceStoreDataService {
     private final NeighborhoodRepository neighborhoodRepository;
     private final NeighborhoodConvenienceRepository neighborhoodConvenienceRepository;
     private final ExternalApiClient externalApiClient;
+    private final ConvenienceDataService convenienceDataService;
 
     private static final GeometryFactory geometryFactory = new GeometryFactory();
     private static final MathTransform transform = createTransfrom();
@@ -57,7 +58,7 @@ public class ConvenienceStoreDataService {
         Map<String, Neighborhood> neighborhoodMap = loadNeighborhoodKeyMap();
 
         Set<String> convenienceStoreKeySet = neighborhoodConvenienceRepository.findAll().stream()
-                .map(c -> convenienceStoreKey(c.getName(), c.getNeighborhood()))
+                .map(c -> convenienceDataService.convenienceKey(c.getName(), c.getNeighborhood()))
                 .collect(Collectors.toSet());
 
         // 편의점 데이터 총 54342개, 한 페이지 최대 데이터 개수 1000개 -> 55번 반복
@@ -116,7 +117,7 @@ public class ConvenienceStoreDataService {
                 // 동일 neighborhood의 동일 이름 가게인지 확인
                 String storeName = getNormalizedStoreName(item.getFacilityName());
 
-                String key = convenienceStoreKey(storeName, neighborhood);
+                String key = convenienceDataService.convenienceKey(storeName, neighborhood);
                 if (convenienceStoreKeySet.contains(key)) {
                     //log.info("이미 저장된 편의점입니다. - " + item.getFacilityName());
                     continue;
@@ -159,11 +160,6 @@ public class ConvenienceStoreDataService {
         }
 
         return null;
-    }
-
-    /** 동일 neighborhood 내 동일 이름의 가게 중복 막기 위한 key */
-    private String convenienceStoreKey (String name, Neighborhood neighborhood) {
-        return name.trim() + "|" + neighborhood.getId();
     }
 
     /** EPSG:3857 (x,y) -> EPSG:4326 (위도, 경도) 변환 */
