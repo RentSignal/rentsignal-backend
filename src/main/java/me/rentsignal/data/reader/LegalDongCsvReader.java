@@ -1,4 +1,4 @@
-package me.rentsignal.data;
+package me.rentsignal.data.reader;
 
 import lombok.extern.slf4j.Slf4j;
 import me.rentsignal.data.dto.LegalDongCsvRowDto;

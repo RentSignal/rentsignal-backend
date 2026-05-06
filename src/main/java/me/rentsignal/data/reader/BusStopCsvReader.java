@@ -1,4 +1,4 @@
-package me.rentsignal.data;
+package me.rentsignal.data.reader;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
@@ -56,8 +56,8 @@ public class BusStopCsvReader {
                     continue;
                 }
 
-                Double latitude = Double.parseDouble(line[2]);
-                Double longitude = Double.parseDouble(line[3]);
+                Double latitude = Double.parseDouble(latitudeText);
+                Double longitude = Double.parseDouble(longitudeText);
 
                 rows.add(
                         BusStopCsvRowDto.builder()

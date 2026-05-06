@@ -2,7 +2,7 @@ package me.rentsignal.data.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.rentsignal.data.BusStopCsvReader;
+import me.rentsignal.data.reader.BusStopCsvReader;
 import me.rentsignal.data.dto.BusStopCsvRowDto;
 import me.rentsignal.locationInfo.entity.NeighborhoodTransport;
 import me.rentsignal.locationInfo.entity.TransportType;
