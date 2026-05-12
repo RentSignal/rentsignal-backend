@@ -7,6 +7,8 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface PostRepository extends JpaRepository<Post, Long> {
 
 
@@ -25,4 +27,5 @@ order by p.createdAt desc
 
     // 내가 쓴 글 조회
     Page<Post> findByUser(User user, Pageable pageable);
+    List<Post> findTop5ByIsDeletedFalseOrderByCreatedAtDesc();
 }
