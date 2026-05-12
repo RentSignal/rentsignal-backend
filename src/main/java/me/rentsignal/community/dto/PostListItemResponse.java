@@ -28,7 +28,9 @@ public class PostListItemResponse {
                 .category(post.getCategory().getLabel())
                 .userId(post.getUser().getId())
                 .userName(post.getUser().getName())
-                .neighborhoodName(post.getNeighborhood().getName())
+                .neighborhoodName(
+                        post.getNeighborhood() != null ? post.getNeighborhood().getName() : null
+                )
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getCommentCount())
                 .viewCount(post.getViewCount())
