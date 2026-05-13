@@ -10,6 +10,8 @@ build/
 **/src/main/resources/bus-stop.csv
 **/src/main/resources/subway.csv
 **/src/main/resources/convenience.csv
+**/src/main/resources/cctv.csv
+**/src/main/resources/crime.csv
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
