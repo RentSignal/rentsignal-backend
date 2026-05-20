@@ -10,8 +10,11 @@ import java.time.LocalDateTime;
 @Builder
 public class PostListItemResponse {
 
+    private static final int PREVIEW_LENGTH = 50;
+
     private Long id;
     private String title;
+    private String content;
     private String category;
     private Long userId;
     private String userName;
@@ -25,6 +28,7 @@ public class PostListItemResponse {
         return PostListItemResponse.builder()
                 .id(post.getId())
                 .title(post.getTitle())
+                .content(post.getContent())
                 .category(post.getCategory().getLabel())
                 .userId(post.getUser().getId())
                 .userName(post.getUser().getName())
@@ -36,5 +40,12 @@ public class PostListItemResponse {
                 .viewCount(post.getViewCount())
                 .createdAt(post.getCreatedAt())
                 .build();
+    }
+    private static String makePreview(String content) {
+        if (content == null) return null;
+
+        return content.length() > PREVIEW_LENGTH
+                ? content.substring(0, PREVIEW_LENGTH) + "..."
+                : content;
     }
 }
