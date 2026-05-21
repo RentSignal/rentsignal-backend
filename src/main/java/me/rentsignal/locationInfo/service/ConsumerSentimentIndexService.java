@@ -1,0 +1,77 @@
+package me.rentsignal.locationInfo.service;
+
+import lombok.RequiredArgsConstructor;
+import me.rentsignal.locationInfo.dto.ConsumerSentimentIndexDto;
+import me.rentsignal.locationInfo.entity.ProvinceIndex;
+import me.rentsignal.locationInfo.repository.ProvinceIndexRepository;
+import me.rentsignal.locationInfo.type.PeriodType;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class ConsumerSentimentIndexService {
+
+    private final ProvinceIndexRepository provinceIndexRepository;
+    private final LocationInfoService locationInfoService;
+
+    // 현재는 서울특별시 데이터만 반환
+    public ConsumerSentimentIndexDto getConsumerSentimentIndex(PeriodType periodType) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMM");
+
+        // 데이터가 2개월 지연되어 제공되기 때문에 2개월 전 데이터 사용
+        YearMonth baseYearMonth = YearMonth.now().minusMonths(2);
+        YearMonth yearMonth = periodType.toComparisonYearMonth(baseYearMonth);
+
+        String formattedYearMonth = yearMonth.format(formatter);
+        ProvinceIndex baseIndex = provinceIndexRepository.findByProvince_NameAndBaseYearMonth("서울특별시", baseYearMonth.format(formatter)).orElse(null);
+        BigDecimal baseValue = (baseIndex != null) ? baseIndex.getConsumerSentimentIndex() : BigDecimal.ZERO;
+
+        BigDecimal value;
+        if (periodType == PeriodType.CURRENT) {
+            value = baseValue;
+        } else {
+            ProvinceIndex comparisonIndex = provinceIndexRepository.findByProvince_NameAndBaseYearMonth("서울특별시", formattedYearMonth).orElse(null);
+            BigDecimal comparisonValue = (comparisonIndex != null) ? comparisonIndex.getConsumerSentimentIndex() : BigDecimal.ZERO;
+
+            value = locationInfoService.calculateChangeRate(baseValue, comparisonValue);
+        }
+
+        List<ConsumerSentimentIndexDto.MonthlyConsumerSentimentIndexDto> trend = getConsumerSentimentIndexTrend(baseYearMonth);
+
+        return new ConsumerSentimentIndexDto(
+                trend,
+                formattedYearMonth.substring(0, 4),
+                formattedYearMonth.substring(4),
+                value.setScale(1, RoundingMode.HALF_UP)
+        );
+    }
+
+    /** baseYearMonth로부터 6개월 전까지의 데이터 조회 */
+    private List<ConsumerSentimentIndexDto.MonthlyConsumerSentimentIndexDto> getConsumerSentimentIndexTrend(YearMonth baseYearMonth) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMM");
+        String end = baseYearMonth.format(formatter);
+        String start = baseYearMonth.minusMonths(6).format(formatter);
+
+        List<ProvinceIndex> indexes = provinceIndexRepository.findByProvince_NameAndBaseYearMonthBetweenOrderByBaseYearMonthAsc("서울특별시", start, end);
+
+        List<ConsumerSentimentIndexDto.MonthlyConsumerSentimentIndexDto> list = new ArrayList<>();
+        for (ProvinceIndex index : indexes) {
+            list.add(
+                    new ConsumerSentimentIndexDto.MonthlyConsumerSentimentIndexDto(
+                            index.getBaseYearMonth().substring(0, 4) + ". " + index.getBaseYearMonth().substring(4),
+                            index.getConsumerSentimentIndex().setScale(1, RoundingMode.HALF_UP)
+                    )
+            );
+        }
+
+        return list;
+    }
+
+}
