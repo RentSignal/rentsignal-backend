@@ -1,6 +1,8 @@
 package me.rentsignal.locationInfo.service;
 
 import lombok.RequiredArgsConstructor;
+import me.rentsignal.global.exception.BaseException;
+import me.rentsignal.global.exception.ErrorCode;
 import me.rentsignal.locationInfo.dto.CurrentRentIndexDto;
 import me.rentsignal.locationInfo.dto.RentIndexChangeDto;
 import me.rentsignal.locationInfo.dto.RentIndexItemDto;
@@ -52,11 +54,10 @@ public class RentIndexService {
     public RentIndexChangeDto getRentIndexChange(HousingType housingType, PeriodType periodType) {
         YearMonth baseYearMonth = YearMonth.now().minusMonths(1);
 
-        YearMonth comparisonYearMonth = switch (periodType) {
-            case ONE_YEAR -> baseYearMonth.minusYears(1);
-            case SIX_MONTH -> baseYearMonth.minusMonths(6);
-            case ONE_MONTH -> baseYearMonth.minusMonths(1);
-        };
+        if (periodType == PeriodType.CURRENT) {
+            throw new BaseException(ErrorCode.INVALID_INPUT_VALUE, "해당 periodType을 지원하지 않습니다.");
+        }
+        YearMonth comparisonYearMonth = periodType.toComparisonYearMonth(baseYearMonth);
 
         List<RegionIndex> baseIndexes = regionIndexRepository.findByHousingTypeAndBaseYearMonth(housingType, baseYearMonth.format(formatter));
         List<RegionIndex> comparisonIndexes = regionIndexRepository.findByHousingTypeAndBaseYearMonth(housingType, comparisonYearMonth.format(formatter));
