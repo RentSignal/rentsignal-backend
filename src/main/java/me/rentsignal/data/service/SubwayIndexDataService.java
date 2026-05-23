@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class SubwayIndexService {
+public class SubwayIndexDataService {
 
     @Value("${SUBWAY_ACCESSIBILITY_INDEX_API_URL}")
     private String SUBWAY_ACCESSIBILITY_INDEX_API_URL;

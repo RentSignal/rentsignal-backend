@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class SentimentIndexService {
+public class SentimentIndexDataService {
 
     private final ProvinceRepository provinceRepository;
     private final ProvinceIndexRepository provinceIndexRepository;

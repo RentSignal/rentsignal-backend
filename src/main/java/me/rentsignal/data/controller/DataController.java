@@ -14,9 +14,9 @@ public class DataController {
 
     private final LegalDongImportService legalDongImportService;
     private final RegionDataService regionDataService;
-    private final RentIndexService rentIndexService;
-    private final SentimentIndexService sentimentIndexService;
-    private final SubwayIndexService subwayIndexService;
+    private final RentIndexDataService rentIndexDataService;
+    private final SentimentIndexDataService sentimentIndexDataService;
+    private final SubwayIndexDataService subwayIndexDataService;
 
     @PostMapping("/legal-dong")
     public ResponseEntity<?> saveLegalDong() {
@@ -32,19 +32,19 @@ public class DataController {
 
     @PostMapping("/rent-index")
     public ResponseEntity<?> saveRentIndex(@RequestParam HousingType housingType) {
-        rentIndexService.saveRentCompositeIndex(housingType);
+        rentIndexDataService.saveRentCompositeIndex(housingType);
         return ResponseEntity.ok().body(BaseResponse.success(null));
     }
 
     @PostMapping("/consumer-sentiment-index")
     public ResponseEntity<?> saveConsumerSentimentIndex() {
-        sentimentIndexService.saveConsumerSentimentIndex();
+        sentimentIndexDataService.saveConsumerSentimentIndex();
         return ResponseEntity.ok().body(BaseResponse.success(null));
     }
 
     @PostMapping("/subway-accessibility-index")
     public ResponseEntity<?> saveSubwayAccessibilityIndex() {
-        subwayIndexService.saveSubwayAccessibilityIndex();
+        subwayIndexDataService.saveSubwayAccessibilityIndex();
         return ResponseEntity.ok().body(BaseResponse.success(null));
     }
 

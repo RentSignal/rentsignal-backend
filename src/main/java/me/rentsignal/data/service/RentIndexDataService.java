@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * 지수 데이터 (소비자 심리지수, 전월세 통합지수, 지하철 역세권 지수) 저장
  */
-public class RentIndexService {
+public class RentIndexDataService {
 
     @Value("${VILLA_RENT_INDEX_API_URL}")
     private String VILLA_RENT_INDEX_API_URL;

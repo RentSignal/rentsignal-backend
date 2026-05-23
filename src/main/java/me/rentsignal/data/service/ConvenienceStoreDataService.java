@@ -154,7 +154,7 @@ public class ConvenienceStoreDataService {
 
     /** XX시 OO구를 XX시OO구라는 하나의 District 이름으로 변환 */
     private String convertDistrictName(String name1, String name2) {
-        for (String city : SubwayIndexService.CITIES) {
+        for (String city : SubwayIndexDataService.CITIES) {
             if (name1.startsWith(city) && name2.endsWith("구"))
                 return name1 + name2;
         }
