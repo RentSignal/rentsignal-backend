@@ -6,7 +6,7 @@ import me.rentsignal.global.exception.ErrorCode;
 import me.rentsignal.location.entity.District;
 import me.rentsignal.location.repository.DistrictRepository;
 import me.rentsignal.locationInfo.dto.DistrictSubwayDto;
-import me.rentsignal.locationInfo.dto.IndexItemDto;
+import me.rentsignal.locationInfo.dto.RankItemDto;
 import me.rentsignal.locationInfo.dto.SubwayAccessibilityIndexDto;
 import me.rentsignal.locationInfo.entity.DistrictIndex;
 import me.rentsignal.locationInfo.entity.NeighborhoodTransport;
@@ -55,8 +55,8 @@ public class SubwayAccessibilityIndexService {
                 ));
 
         List<SubwayAccessibilityIndexDto.DistrictIndexDto> indexes = new ArrayList<>();
-        List<IndexItemDto> high = new ArrayList<>();
-        List<IndexItemDto> changeRate = new ArrayList<>();
+        List<RankItemDto> high = new ArrayList<>();
+        List<RankItemDto> changeRate = new ArrayList<>();
         int i = 1;
         for (DistrictIndex districtIndex : currentIndexes) {
             Long districtId = districtIndex.getDistrict().getId();
@@ -68,11 +68,13 @@ public class SubwayAccessibilityIndexService {
                     districtIndex.getSubwayAccessibilityIndex().setScale(1, RoundingMode.HALF_UP)
             ));
             // 당월 지하철 역세권 지수 내림차순
-            high.add(new IndexItemDto(
-                    i,
-                    districtName,
-                    districtIndex.getSubwayAccessibilityIndex().setScale(1, RoundingMode.HALF_UP)
-            ));
+            if (i < 8) {
+                high.add(new RankItemDto(
+                        i,
+                        districtName,
+                        districtIndex.getSubwayAccessibilityIndex().setScale(1, RoundingMode.HALF_UP)
+                ));
+            }
             i++;
             // 6개월 전 기준 지수 증감률 내림차순
             DistrictIndex previousIndex = previousIndexMap.get(districtId);
@@ -82,18 +84,18 @@ public class SubwayAccessibilityIndexService {
 
             BigDecimal rate = locationInfoService.calculateChangeRate(districtIndex.getSubwayAccessibilityIndex(),
                     previousIndex.getSubwayAccessibilityIndex());
-            changeRate.add(new IndexItemDto(0,
+            changeRate.add(new RankItemDto(0,
                     districtName,
                     rate));
         }
 
         changeRate.sort((a, b) -> b.value().compareTo(a.value()));
 
-        List<IndexItemDto> rankedChangeRate = new ArrayList<>();
-        for (int j = 0; j < changeRate.size(); j++) {
-            IndexItemDto item = changeRate.get(j);
+        List<RankItemDto> rankedChangeRate = new ArrayList<>();
+        for (int j = 0; j < Math.min(7, changeRate.size()); j++) {
+            RankItemDto item = changeRate.get(j);
 
-            rankedChangeRate.add(new IndexItemDto(
+            rankedChangeRate.add(new RankItemDto(
                     j + 1,
                     item.name(),
                     item.value()
