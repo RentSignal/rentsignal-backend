@@ -3,10 +3,10 @@ package me.rentsignal.locationInfo.dto;
 import java.util.List;
 
 public record ConvenienceRankDto(
-        List<NeighborhoodConvenienceCountDto> ranking
+        List<NeighborhoodConvenienceRankDto> ranking
 ) {
 
-    public record NeighborhoodConvenienceCountDto(
+    public record NeighborhoodConvenienceRankDto(
             int rank,
             Long id,
             String name,

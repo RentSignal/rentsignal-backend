@@ -1,6 +1,7 @@
 package me.rentsignal.locationInfo.repository;
 
 import me.rentsignal.locationInfo.dto.NeighborhoodConvenienceQueryDto;
+import me.rentsignal.locationInfo.entity.ConvenienceType;
 import me.rentsignal.locationInfo.entity.NeighborhoodConvenience;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,4 +25,5 @@ public interface NeighborhoodConvenienceRepository extends JpaRepository<Neighbo
         ORDER BY COUNT(nc) DESC 
     """)
     List<NeighborhoodConvenienceQueryDto> findTopNeighborhoodConvenienceCount(Pageable pageable);
+    List<NeighborhoodConvenience> findByNeighborhood_IdAndType(Long id, ConvenienceType type);
 }
