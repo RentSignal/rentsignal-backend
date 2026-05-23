@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import me.rentsignal.global.response.BaseResponse;
 import me.rentsignal.locationInfo.dto.ConvenienceRankDto;
 import me.rentsignal.locationInfo.dto.ConvenienceTypeCountDto;
+import me.rentsignal.locationInfo.dto.DistrictSafetyDto;
 import me.rentsignal.locationInfo.service.ConvenienceService;
+import me.rentsignal.locationInfo.service.SafetyService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class LocationLivingFactorController {
 
     private final ConvenienceService convenienceService;
+    private final SafetyService safetyService;
 
     @GetMapping("/convenience")
     public ResponseEntity<?> getConvenienceRanking() {
@@ -28,6 +31,12 @@ public class LocationLivingFactorController {
     public ResponseEntity<?> getConvenienceRanking(@PathVariable Long neighborhoodId) {
         ConvenienceTypeCountDto convenienceTypeCount = convenienceService.getConvenienceTypeCount(neighborhoodId);
         return ResponseEntity.ok().body(BaseResponse.success(convenienceTypeCount));
+    }
+
+    @GetMapping("/safety")
+    public ResponseEntity<?> getSafety() {
+        DistrictSafetyDto safety = safetyService.getSafety();
+        return ResponseEntity.ok().body(BaseResponse.success(safety));
     }
 
 }
