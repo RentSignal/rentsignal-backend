@@ -2,9 +2,9 @@ package me.rentsignal.locationInfo.dto;
 
 import java.math.BigDecimal;
 
-public record RentIndexItemDto(
+public record IndexItemDto(
         int rank,
-        String regionName,
+        String name,
         BigDecimal value
 ) {
 }

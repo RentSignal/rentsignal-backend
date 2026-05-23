@@ -5,9 +5,11 @@ import me.rentsignal.global.response.BaseResponse;
 import me.rentsignal.locationInfo.dto.ConsumerSentimentIndexDto;
 import me.rentsignal.locationInfo.dto.CurrentRentIndexDto;
 import me.rentsignal.locationInfo.dto.RentIndexChangeDto;
+import me.rentsignal.locationInfo.dto.SubwayAccessibilityIndexDto;
 import me.rentsignal.locationInfo.entity.HousingType;
 import me.rentsignal.locationInfo.service.ConsumerSentimentIndexService;
 import me.rentsignal.locationInfo.service.RentIndexService;
+import me.rentsignal.locationInfo.service.SubwayAccessibilityIndexService;
 import me.rentsignal.locationInfo.type.PeriodType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +24,7 @@ public class LocationInfoController {
 
     private final RentIndexService rentIndexService;
     private final ConsumerSentimentIndexService consumerSentimentIndexService;
+    private final SubwayAccessibilityIndexService subwayAccessibilityIndexService;
 
     @GetMapping("/rent-index/current")
     public ResponseEntity<?> getCurrentRentIndex(@RequestParam HousingType housingType) {
@@ -40,6 +43,12 @@ public class LocationInfoController {
     public ResponseEntity<?> getConsumerSentimentIndex(@RequestParam PeriodType periodType) {
         ConsumerSentimentIndexDto consumerSentimentIndex = consumerSentimentIndexService.getConsumerSentimentIndex(periodType);
         return ResponseEntity.ok().body(BaseResponse.success(consumerSentimentIndex));
+    }
+
+    @GetMapping("/subway-accessibility")
+    public ResponseEntity<?> getSubwayAccessibilityIndex() {
+        SubwayAccessibilityIndexDto subwayAccessibilityIndex = subwayAccessibilityIndexService.getSubwayAccessibilityIndex();
+        return ResponseEntity.ok().body(BaseResponse.success(subwayAccessibilityIndex));
     }
 
 }

@@ -5,7 +5,7 @@ import me.rentsignal.global.exception.BaseException;
 import me.rentsignal.global.exception.ErrorCode;
 import me.rentsignal.locationInfo.dto.CurrentRentIndexDto;
 import me.rentsignal.locationInfo.dto.RentIndexChangeDto;
-import me.rentsignal.locationInfo.dto.RentIndexItemDto;
+import me.rentsignal.locationInfo.dto.IndexItemDto;
 import me.rentsignal.locationInfo.entity.HousingType;
 import me.rentsignal.locationInfo.entity.RegionIndex;
 import me.rentsignal.locationInfo.repository.RegionIndexRepository;
@@ -37,10 +37,10 @@ public class RentIndexService {
 
         List<RegionIndex> indexes = regionIndexRepository.findByHousingTypeAndBaseYearMonthOrderByRentCompositeIndexDesc(housingType, now.format(formatter));
 
-        List<RentIndexItemDto> list = new ArrayList<>();
+        List<IndexItemDto> list = new ArrayList<>();
         int i = 1;
         for (RegionIndex index : indexes) {
-            list.add(new RentIndexItemDto(
+            list.add(new IndexItemDto(
 
                     i,
                     getRegionName(index),
@@ -68,8 +68,8 @@ public class RentIndexService {
                         index -> index.getRegion().getId(),
                         index -> index));
 
-        List<RentIndexItemDto> riseList = new ArrayList<>();
-        List<RentIndexItemDto> fallList = new ArrayList<>();
+        List<IndexItemDto> riseList = new ArrayList<>();
+        List<IndexItemDto> fallList = new ArrayList<>();
         for (RegionIndex baseIndex : baseIndexes) {
             // comparisonIndexes에 해당 id의 region의 regionIndex가 존재하는지 확인
             RegionIndex comparisonIndex = comparisonIndexMap.get(baseIndex.getRegion().getId());
@@ -86,26 +86,26 @@ public class RentIndexService {
 
             // 증감률이 양수이면 riseList에, 음수이면 fallList에, 0이면 제외
             if (changeRate.compareTo(BigDecimal.ZERO) > 0) {
-                riseList.add(new RentIndexItemDto(
+                riseList.add(new IndexItemDto(
                         0,   // 순위는 임시로 0
                         getRegionName(baseIndex),
                         changeRate));
             } else if (changeRate.compareTo(BigDecimal.ZERO) < 0) {
-                fallList.add(new RentIndexItemDto(
+                fallList.add(new IndexItemDto(
                         0,
                         getRegionName(baseIndex),
                         changeRate));
             }
         }
 
-        List<RentIndexItemDto> sortedRiseList = riseList.stream()
+        List<IndexItemDto> sortedRiseList = riseList.stream()
                 .sorted(
-                        Comparator.comparing(RentIndexItemDto::value)
+                        Comparator.comparing(IndexItemDto::value)
                                 .reversed()).toList();
-        List<RentIndexItemDto> sortedFallList = fallList.stream()
+        List<IndexItemDto> sortedFallList = fallList.stream()
                 .sorted(
                         Comparator.comparing(
-                                RentIndexItemDto::value)
+                                IndexItemDto::value)
                 ).toList();
 
         return new RentIndexChangeDto(
@@ -119,15 +119,15 @@ public class RentIndexService {
     }
 
     /** 정렬된 RentIndexItemDto 리스트 각 요소에 rank 반영해서 새로운 리스트 반환 */
-    private List<RentIndexItemDto> getRankedList(List<RentIndexItemDto> sortedList) {
-        List<RentIndexItemDto> rankedList = new ArrayList<>();
+    private List<IndexItemDto> getRankedList(List<IndexItemDto> sortedList) {
+        List<IndexItemDto> rankedList = new ArrayList<>();
 
         for (int i = 0; i < sortedList.size(); i++) {
-            RentIndexItemDto item = sortedList.get(i);
+            IndexItemDto item = sortedList.get(i);
 
-            rankedList.add(new RentIndexItemDto(
+            rankedList.add(new IndexItemDto(
                     i+1,
-                    item.regionName(),
+                    item.name(),
                     item.value()
             ));
         }
