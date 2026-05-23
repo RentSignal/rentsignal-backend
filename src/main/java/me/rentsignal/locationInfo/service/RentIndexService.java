@@ -27,9 +27,9 @@ import java.util.stream.Collectors;
 public class RentIndexService {
 
     private final RegionIndexRepository regionIndexRepository;
+    private final LocationInfoService locationInfoService;
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMM");
-    private final LocationInfoService locationInfoService;
 
     public CurrentRentIndexDto getCurrentRentIndex(HousingType housingType) {
         // 데이터가 1개월 지연되어 제공되기 때문에 1개월 전 데이터 사용

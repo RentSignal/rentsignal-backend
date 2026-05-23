@@ -1,10 +1,18 @@
 package me.rentsignal.locationInfo.service;
 
 import lombok.RequiredArgsConstructor;
+import me.rentsignal.global.exception.BaseException;
+import me.rentsignal.global.exception.ErrorCode;
+import me.rentsignal.location.entity.District;
+import me.rentsignal.location.repository.DistrictRepository;
+import me.rentsignal.locationInfo.dto.DistrictSubwayDto;
 import me.rentsignal.locationInfo.dto.IndexItemDto;
 import me.rentsignal.locationInfo.dto.SubwayAccessibilityIndexDto;
 import me.rentsignal.locationInfo.entity.DistrictIndex;
+import me.rentsignal.locationInfo.entity.NeighborhoodTransport;
+import me.rentsignal.locationInfo.entity.TransportType;
 import me.rentsignal.locationInfo.repository.DistrictIndexRepository;
+import me.rentsignal.locationInfo.repository.NeighborhoodTransportRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -22,10 +30,12 @@ public class SubwayAccessibilityIndexService {
 
     private final DistrictIndexRepository districtIndexRepository;
     private final LocationInfoService locationInfoService;
+    private final DistrictRepository districtRepository;
+    private final NeighborhoodTransportRepository neighborhoodTransportRepository;
+
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMM");
 
     public SubwayAccessibilityIndexDto getSubwayAccessibilityIndex() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMM");
-
         // 데이터가 2개월 지연되어 제공되기 때문에 2개월 전 데이터 사용
         YearMonth baseYearMonth = YearMonth.now().minusMonths(2);
         YearMonth comparisonYearMonth = baseYearMonth.minusMonths(6);
@@ -74,16 +84,16 @@ public class SubwayAccessibilityIndexService {
                     previousIndex.getSubwayAccessibilityIndex());
             changeRate.add(new IndexItemDto(0,
                     districtName,
-                    rate.setScale(1, RoundingMode.HALF_UP)));
+                    rate));
         }
 
         changeRate.sort((a, b) -> b.value().compareTo(a.value()));
 
-        List<IndexItemDto> rankedchangeRate = new ArrayList<>();
+        List<IndexItemDto> rankedChangeRate = new ArrayList<>();
         for (int j = 0; j < changeRate.size(); j++) {
             IndexItemDto item = changeRate.get(j);
 
-            rankedchangeRate.add(new IndexItemDto(
+            rankedChangeRate.add(new IndexItemDto(
                     j + 1,
                     item.name(),
                     item.value()
@@ -92,8 +102,36 @@ public class SubwayAccessibilityIndexService {
 
         return new SubwayAccessibilityIndexDto(
                 high,
-                rankedchangeRate,
+                rankedChangeRate,
                 indexes
+        );
+    }
+
+    public DistrictSubwayDto getSubwayStationByDistrict(Long districtId) {
+        District district = districtRepository.findById(districtId).orElseThrow(
+                () -> new BaseException(ErrorCode.DISTRICT_NOT_FOUND, "해당 id의 시/군/구가 존재하지 않습니다."));
+
+        List<NeighborhoodTransport> neighborhoodTransports = neighborhoodTransportRepository.findByNeighborhood_District_IdAndTransportType(districtId, TransportType.SUBWAY_STATION);
+        List<DistrictSubwayDto.SubwayStationDto> subwayStations = new ArrayList<>();
+        for (NeighborhoodTransport transport : neighborhoodTransports) {
+            String name = transport.getName();
+            String[] arr = name.split("\\|");
+            String stationName = arr[0];
+            String lineName = arr[1];
+            subwayStations.add(new DistrictSubwayDto.SubwayStationDto(
+                    lineName,
+                    stationName
+            ));
+        }
+
+        YearMonth baseYearMonth = YearMonth.now().minusMonths(2);
+        DistrictIndex index = districtIndexRepository.findByDistrict_IdAndBaseYearMonth(districtId, baseYearMonth.format(formatter)).orElse(null);
+        BigDecimal value = (index != null) ? index.getSubwayAccessibilityIndex().setScale(1, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+
+        return new DistrictSubwayDto(
+                district.getName(),
+                value,
+                subwayStations
         );
     }
 

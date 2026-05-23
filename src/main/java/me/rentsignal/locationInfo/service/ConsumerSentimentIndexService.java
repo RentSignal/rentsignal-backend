@@ -35,7 +35,7 @@ public class ConsumerSentimentIndexService {
 
         BigDecimal value;
         if (periodType == PeriodType.CURRENT) {
-            value = baseValue;
+            value = baseValue.setScale(1, RoundingMode.HALF_UP);
         } else {
             ProvinceIndex comparisonIndex = provinceIndexRepository.findByProvince_NameAndBaseYearMonth("서울특별시", formattedYearMonth).orElse(null);
             BigDecimal comparisonValue = (comparisonIndex != null) ? comparisonIndex.getConsumerSentimentIndex() : BigDecimal.ZERO;
@@ -49,7 +49,7 @@ public class ConsumerSentimentIndexService {
                 trend,
                 formattedYearMonth.substring(0, 4),
                 formattedYearMonth.substring(4),
-                value.setScale(1, RoundingMode.HALF_UP)
+                value
         );
     }
 
