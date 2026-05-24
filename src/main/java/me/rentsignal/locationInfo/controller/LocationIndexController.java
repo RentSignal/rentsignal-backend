@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/info")
-public class LocationInfoController {
+public class LocationIndexController {
 
     private final RentIndexService rentIndexService;
     private final ConsumerSentimentIndexService consumerSentimentIndexService;

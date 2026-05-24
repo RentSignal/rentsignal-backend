@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record SubwayAccessibilityIndexDto(
-        List<IndexItemDto> high,
-        List<IndexItemDto> changeRate,
+        List<RankItemDto> high,
+        List<RankItemDto> changeRate,
         List<DistrictIndexDto> districtIndexes
 ) {
     public record DistrictIndexDto(
