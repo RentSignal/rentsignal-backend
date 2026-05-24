@@ -12,6 +12,7 @@ build/
 **/src/main/resources/convenience.csv
 **/src/main/resources/cctv.csv
 **/src/main/resources/crime.csv
+**/src/main/resources/subway-travel-time.csv
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

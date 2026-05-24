@@ -34,6 +34,7 @@ public enum ErrorCode {
     NEIGHBORHOOD_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 읍/면/동을 찾을 수 없습니다."),
     RI_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 리를 찾을 수 없습니다."),
     REGION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 권역을 찾을 수 없습니다."),
+    NEIGHBORHOOD_TRANSPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 neighborhood transport를 찾을 수 없습니다."),
 
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "잘못된 입력값입니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.");

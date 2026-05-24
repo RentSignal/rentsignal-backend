@@ -11,4 +11,5 @@ import java.util.List;
 @Repository
 public interface NeighborhoodTransportRepository extends JpaRepository<NeighborhoodTransport, Long> {
     List<NeighborhoodTransport> findByNeighborhood_District_IdAndTransportType(Long id, TransportType type);
+    List<NeighborhoodTransport> findAllByTransportType(TransportType type);
 }
