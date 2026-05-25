@@ -8,10 +8,4 @@ public record DistrictSubwayDto(
         BigDecimal value,
         List<SubwayStationDto> subwayStations
 ) {
-
-    public record SubwayStationDto(
-            String lineName,
-            String stationName
-    ) {}
-
 }

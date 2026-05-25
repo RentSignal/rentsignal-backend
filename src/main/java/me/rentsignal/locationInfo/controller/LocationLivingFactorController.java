@@ -2,16 +2,15 @@ package me.rentsignal.locationInfo.controller;
 
 import lombok.RequiredArgsConstructor;
 import me.rentsignal.global.response.BaseResponse;
-import me.rentsignal.locationInfo.dto.ConvenienceRankDto;
-import me.rentsignal.locationInfo.dto.ConvenienceTypeCountDto;
-import me.rentsignal.locationInfo.dto.DistrictSafetyDto;
+import me.rentsignal.locationInfo.dto.*;
 import me.rentsignal.locationInfo.service.ConvenienceService;
 import me.rentsignal.locationInfo.service.SafetyService;
+import me.rentsignal.locationInfo.service.TransportService;
+import me.rentsignal.locationInfo.type.BusinessDistrictType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,6 +19,7 @@ public class LocationLivingFactorController {
 
     private final ConvenienceService convenienceService;
     private final SafetyService safetyService;
+    private final TransportService transportService;
 
     @GetMapping("/convenience")
     public ResponseEntity<?> getConvenienceRanking() {
@@ -37,6 +37,18 @@ public class LocationLivingFactorController {
     public ResponseEntity<?> getSafety() {
         DistrictSafetyDto safety = safetyService.getSafety();
         return ResponseEntity.ok().body(BaseResponse.success(safety));
+    }
+
+    @GetMapping("/transport")
+    public ResponseEntity<?> getTransport(@RequestParam BusinessDistrictType type) {
+        List<RecommendedNeighborhoodByBusinessDistrict> recommendedNeighborhoodByBusinessDistrict = transportService.getRecommendedNeighborhoodByBusinessDistrict(type);
+        return ResponseEntity.ok().body(BaseResponse.success(recommendedNeighborhoodByBusinessDistrict));
+    }
+
+    @GetMapping("/transport/{neighborhoodId}")
+    public ResponseEntity<?> getNeighborhoodTransport(@PathVariable Long neighborhoodId) {
+        NeighborhoodTransportDto neighborhoodTransport = transportService.getNeighborhoodTransport(neighborhoodId);
+        return ResponseEntity.ok().body(BaseResponse.success(neighborhoodTransport));
     }
 
 }
