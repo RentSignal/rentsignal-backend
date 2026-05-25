@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import me.rentsignal.community.dto.PostListItemResponse;
 import me.rentsignal.global.response.BaseResponse;
 import me.rentsignal.home.service.HomeService;
+import me.rentsignal.recommendation.dto.RecommendResponseDto;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,5 +21,12 @@ public class HomeController {
     @GetMapping("/reviews")
     public BaseResponse<List<PostListItemResponse>> getHomeReviews() {
         return BaseResponse.success(homeService.getHomeReviews());
+    }
+
+    @GetMapping("/today-recommendations")
+    public BaseResponse<List<RecommendResponseDto.RecommendationDto>> getTodayRecommendations() {
+        return BaseResponse.success(
+                homeService.getTodayRecommendations()
+        );
     }
 }
