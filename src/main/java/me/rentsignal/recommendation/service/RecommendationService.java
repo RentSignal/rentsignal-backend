@@ -35,6 +35,13 @@ public class RecommendationService {
 
     public RecommendResponseDto getRecommendation(Long userId, RecommendRequestDto requestDto) {
         authService.validateUserAccess(userId, Role.ROLE_USER);
+        return createRecommendation(requestDto);
+    }
+    public RecommendResponseDto getRecommendationForHome(RecommendRequestDto requestDto) {
+        return createRecommendation(requestDto);
+    }
+
+    private RecommendResponseDto createRecommendation(RecommendRequestDto requestDto) {
 
         // 1 ) AI API 요청 DTO를 생성하기 위해 변환 ----------
         String userDong = requestDto.getUserDong() != null ? requestDto.getUserDong() : "";
