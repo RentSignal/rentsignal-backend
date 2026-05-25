@@ -2,10 +2,7 @@ package me.rentsignal.locationInfo.controller;
 
 import lombok.RequiredArgsConstructor;
 import me.rentsignal.global.response.BaseResponse;
-import me.rentsignal.locationInfo.dto.RecommendedNeighborhoodByBusinessDistrict;
-import me.rentsignal.locationInfo.dto.ConvenienceRankDto;
-import me.rentsignal.locationInfo.dto.ConvenienceTypeCountDto;
-import me.rentsignal.locationInfo.dto.DistrictSafetyDto;
+import me.rentsignal.locationInfo.dto.*;
 import me.rentsignal.locationInfo.service.ConvenienceService;
 import me.rentsignal.locationInfo.service.SafetyService;
 import me.rentsignal.locationInfo.service.TransportService;
@@ -46,6 +43,12 @@ public class LocationLivingFactorController {
     public ResponseEntity<?> getTransport(@RequestParam BusinessDistrictType type) {
         List<RecommendedNeighborhoodByBusinessDistrict> recommendedNeighborhoodByBusinessDistrict = transportService.getRecommendedNeighborhoodByBusinessDistrict(type);
         return ResponseEntity.ok().body(BaseResponse.success(recommendedNeighborhoodByBusinessDistrict));
+    }
+
+    @GetMapping("/transport/{neighborhoodId}")
+    public ResponseEntity<?> getNeighborhoodTransport(@PathVariable Long neighborhoodId) {
+        NeighborhoodTransportDto neighborhoodTransport = transportService.getNeighborhoodTransport(neighborhoodId);
+        return ResponseEntity.ok().body(BaseResponse.success(neighborhoodTransport));
     }
 
 }

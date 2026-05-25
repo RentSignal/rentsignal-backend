@@ -4,8 +4,11 @@ import lombok.RequiredArgsConstructor;
 import me.rentsignal.global.exception.BaseException;
 import me.rentsignal.global.exception.ErrorCode;
 import me.rentsignal.location.entity.Neighborhood;
+import me.rentsignal.location.repository.NeighborhoodRepository;
+import me.rentsignal.locationInfo.dto.NeighborhoodTransportDto;
 import me.rentsignal.locationInfo.dto.RecommendedNeighborhoodByBusinessDistrict;
 import me.rentsignal.locationInfo.dto.SubwayReachableStationDto;
+import me.rentsignal.locationInfo.dto.SubwayStationDto;
 import me.rentsignal.locationInfo.entity.NeighborhoodTransport;
 import me.rentsignal.locationInfo.entity.SubwayTravelTime;
 import me.rentsignal.locationInfo.entity.TransportType;
@@ -21,9 +24,12 @@ import java.util.*;
 public class TransportService {
 
     private static final int MAX_SECONDS = 20 * 60; // 20분
+    private static final double AVG_SUBWAY_STATION_COUNT = 0.8565;
+    private static final double AVG_BUS_STOP_COUNT = 32.6681;
 
     private final NeighborhoodTransportRepository neighborhoodTransportRepository;
     private final SubwayTravelTimeRepository subwayTravelTimeRepository;
+    private final NeighborhoodRepository neighborhoodRepository;
 
     /** 환승 제외 주요 업무지구까지 20분 이내 소요되는 지하철역 조회 */
     public List<RecommendedNeighborhoodByBusinessDistrict> getRecommendedNeighborhoodByBusinessDistrict(BusinessDistrictType businessDistrictType) {
@@ -214,5 +220,43 @@ public class TransportService {
             Long stationId,
             int seconds
     ) {}
+
+    public NeighborhoodTransportDto getNeighborhoodTransport(Long neighborhoodId) {
+        Neighborhood neighborhood = neighborhoodRepository.findById(neighborhoodId).orElseThrow(
+                () -> new BaseException(ErrorCode.NEIGHBORHOOD_NOT_FOUND, "해당 id의 읍/면/동이 존재하지 않습니다."));
+
+        List<NeighborhoodTransport> neighborhoodTransports = neighborhoodTransportRepository.findByNeighborhood_IdAndTransportType(neighborhoodId, TransportType.SUBWAY_STATION);
+        List<SubwayStationDto> subwayStations = new ArrayList<>();
+        for (NeighborhoodTransport neighborhoodTransport : neighborhoodTransports) {
+            String[] arr = neighborhoodTransport.getName().split("\\|");
+            subwayStations.add(new SubwayStationDto(
+                    arr[1],
+                    arr[0]
+            ));
+        }
+
+        int subwayStationCount = neighborhoodTransports.size();
+        int busStopCount = neighborhoodTransportRepository.countByNeighborhood_IdAndTransportType(neighborhoodId, TransportType.BUS_STOP);
+
+        int subwayCountRatioToAverage = (int) Math.round((subwayStationCount / AVG_SUBWAY_STATION_COUNT) * 100);
+        int busCountRatioToAverage = (int) Math.round((busStopCount / AVG_BUS_STOP_COUNT) * 100);
+
+        return new NeighborhoodTransportDto(
+                neighborhood.getDistrict().getName().replace("시", "시 ") + " " + neighborhood.getName(),
+                subwayStations,
+                List.of(
+                        new NeighborhoodTransportDto.TransportCountDto(
+                                TransportType.BUS_STOP.name(),
+                                busStopCount,
+                                busCountRatioToAverage
+                        ),
+                        new NeighborhoodTransportDto.TransportCountDto(
+                                TransportType.SUBWAY_STATION.name(),
+                                subwayStationCount,
+                                subwayCountRatioToAverage
+                        )
+                )
+        );
+    }
 
 }

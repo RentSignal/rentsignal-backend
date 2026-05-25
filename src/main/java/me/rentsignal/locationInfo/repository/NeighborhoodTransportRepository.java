@@ -14,4 +14,6 @@ public interface NeighborhoodTransportRepository extends JpaRepository<Neighborh
     List<NeighborhoodTransport> findByNeighborhood_District_IdAndTransportType(Long id, TransportType type);
     List<NeighborhoodTransport> findAllByTransportType(TransportType type);
     Optional<NeighborhoodTransport> findByNameAndTransportType(String name, TransportType type);
+    List<NeighborhoodTransport> findByNeighborhood_IdAndTransportType(Long id, TransportType type);
+    int countByNeighborhood_IdAndTransportType(Long id, TransportType type);
 }

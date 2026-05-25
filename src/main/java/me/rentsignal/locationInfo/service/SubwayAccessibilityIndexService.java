@@ -8,6 +8,7 @@ import me.rentsignal.location.repository.DistrictRepository;
 import me.rentsignal.locationInfo.dto.DistrictSubwayDto;
 import me.rentsignal.locationInfo.dto.RankItemDto;
 import me.rentsignal.locationInfo.dto.SubwayAccessibilityIndexDto;
+import me.rentsignal.locationInfo.dto.SubwayStationDto;
 import me.rentsignal.locationInfo.entity.DistrictIndex;
 import me.rentsignal.locationInfo.entity.NeighborhoodTransport;
 import me.rentsignal.locationInfo.entity.TransportType;
@@ -114,13 +115,13 @@ public class SubwayAccessibilityIndexService {
                 () -> new BaseException(ErrorCode.DISTRICT_NOT_FOUND, "해당 id의 시/군/구가 존재하지 않습니다."));
 
         List<NeighborhoodTransport> neighborhoodTransports = neighborhoodTransportRepository.findByNeighborhood_District_IdAndTransportType(districtId, TransportType.SUBWAY_STATION);
-        List<DistrictSubwayDto.SubwayStationDto> subwayStations = new ArrayList<>();
+        List<SubwayStationDto> subwayStations = new ArrayList<>();
         for (NeighborhoodTransport transport : neighborhoodTransports) {
             String name = transport.getName();
             String[] arr = name.split("\\|");
             String stationName = arr[0];
             String lineName = arr[1];
-            subwayStations.add(new DistrictSubwayDto.SubwayStationDto(
+            subwayStations.add(new SubwayStationDto(
                     lineName,
                     stationName
             ));
