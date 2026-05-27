@@ -153,7 +153,7 @@ public class CommunityController {
 
     // 내가 쓴 댓글 조회
     @GetMapping("/mypage/comments")
-    public BaseResponse<Page<CommentResponse>> getMyComments(
+    public BaseResponse<Page<PostListItemResponse>> getMyComments(
             @AuthenticationPrincipal CustomPrincipal principal,
             Pageable pageable
     ) {

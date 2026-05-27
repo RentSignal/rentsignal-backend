@@ -285,13 +285,13 @@ public class CommunityService {
 
     // 내가 쓴 댓글
     @Transactional(readOnly = true)
-    public Page<CommentResponse> getMyComments(CustomPrincipal principal, Pageable pageable) {
+    public Page<PostListItemResponse> getMyComments(CustomPrincipal principal, Pageable pageable) {
 
         User user = authService.getCurrentUser(principal.getId());
 
         return commentRepository
-                .findByUser(user, pageable)
-                .map(CommentResponse::from);
+                .findPostsByUser(user, pageable)
+                .map(PostListItemResponse::from);
     }
 
     // 내가 좋아요한 글
