@@ -3,6 +3,7 @@ package me.rentsignal.locationInfo.repository;
 import me.rentsignal.locationInfo.entity.HousingType;
 import me.rentsignal.locationInfo.entity.RegionIndex;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -11,4 +12,9 @@ import java.util.List;
 public interface RegionIndexRepository extends JpaRepository<RegionIndex, Long> {
     List<RegionIndex> findByHousingTypeAndBaseYearMonthOrderByRentCompositeIndexDesc(HousingType housingType, String baseYearMonth);
     List<RegionIndex> findByHousingTypeAndBaseYearMonth(HousingType housingType, String baseYearMonth);
+    @Query("""
+    SELECT MAX(r.baseYearMonth)
+    FROM RegionIndex r
+""")
+    String findLatestBaseYearMonth();
 }

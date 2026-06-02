@@ -10,12 +10,12 @@ import me.rentsignal.locationInfo.entity.HousingType;
 import me.rentsignal.locationInfo.entity.RegionIndex;
 import me.rentsignal.locationInfo.repository.RegionIndexRepository;
 import me.rentsignal.locationInfo.type.PeriodType;
+import me.rentsignal.locationInfo.util.YearMonthUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -29,13 +29,11 @@ public class RentIndexService {
     private final RegionIndexRepository regionIndexRepository;
     private final LocationInfoService locationInfoService;
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMM");
-
     public CurrentRentIndexDto getCurrentRentIndex(HousingType housingType) {
         // 데이터가 1개월 지연되어 제공되기 때문에 1개월 전 데이터 사용
-        YearMonth now = YearMonth.now().minusMonths(1);
+        String baseYearMonth = regionIndexRepository.findLatestBaseYearMonth();
 
-        List<RegionIndex> indexes = regionIndexRepository.findByHousingTypeAndBaseYearMonthOrderByRentCompositeIndexDesc(housingType, now.format(formatter));
+        List<RegionIndex> indexes = regionIndexRepository.findByHousingTypeAndBaseYearMonthOrderByRentCompositeIndexDesc(housingType, baseYearMonth);
 
         List<RankItemDto> list = new ArrayList<>();
         int i = 1;
@@ -53,15 +51,17 @@ public class RentIndexService {
     }
 
     public RentIndexChangeDto getRentIndexChange(HousingType housingType, PeriodType periodType) {
-        YearMonth baseYearMonth = YearMonth.now().minusMonths(1);
+        String baseYearMonthText = regionIndexRepository.findLatestBaseYearMonth();
+        YearMonth baseYearMonth = YearMonthUtils.toYearMonth(baseYearMonthText);
 
         if (periodType == PeriodType.CURRENT) {
             throw new BaseException(ErrorCode.INVALID_INPUT_VALUE, "해당 periodType을 지원하지 않습니다.");
         }
+
         YearMonth comparisonYearMonth = periodType.toComparisonYearMonth(baseYearMonth);
 
-        List<RegionIndex> baseIndexes = regionIndexRepository.findByHousingTypeAndBaseYearMonth(housingType, baseYearMonth.format(formatter));
-        List<RegionIndex> comparisonIndexes = regionIndexRepository.findByHousingTypeAndBaseYearMonth(housingType, comparisonYearMonth.format(formatter));
+        List<RegionIndex> baseIndexes = regionIndexRepository.findByHousingTypeAndBaseYearMonth(housingType, YearMonthUtils.formatYearMonth(baseYearMonth));
+        List<RegionIndex> comparisonIndexes = regionIndexRepository.findByHousingTypeAndBaseYearMonth(housingType, YearMonthUtils.formatYearMonth(comparisonYearMonth));
 
         Map<Long, RegionIndex> comparisonIndexMap = comparisonIndexes.stream()
                 .collect(Collectors.toMap(

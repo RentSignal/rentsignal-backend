@@ -14,6 +14,7 @@ import me.rentsignal.locationInfo.entity.NeighborhoodTransport;
 import me.rentsignal.locationInfo.entity.TransportType;
 import me.rentsignal.locationInfo.repository.DistrictIndexRepository;
 import me.rentsignal.locationInfo.repository.NeighborhoodTransportRepository;
+import me.rentsignal.locationInfo.util.YearMonthUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -34,15 +35,13 @@ public class SubwayAccessibilityIndexService {
     private final DistrictRepository districtRepository;
     private final NeighborhoodTransportRepository neighborhoodTransportRepository;
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMM");
-
     public SubwayAccessibilityIndexDto getSubwayAccessibilityIndex() {
         // 데이터가 2개월 지연되어 제공되기 때문에 2개월 전 데이터 사용
-        YearMonth baseYearMonth = YearMonth.now().minusMonths(2);
-        YearMonth comparisonYearMonth = baseYearMonth.minusMonths(6);
+        String base = districtIndexRepository.findLatestBaseYearMonth();
+        YearMonth baseYearMonth = YearMonthUtils.toYearMonth(base);
 
-        String base = baseYearMonth.format(formatter);
-        String comparison = comparisonYearMonth.format(formatter);
+        YearMonth comparisonYearMonth = baseYearMonth.minusMonths(6);
+        String comparison = YearMonthUtils.formatYearMonth(comparisonYearMonth);
 
         // 서울특별시 데이터의 당월, 6개월 전 데이터 조회
         List<DistrictIndex> currentIndexes = districtIndexRepository.findByDistrict_Province_NameAndBaseYearMonthOrderBySubwayAccessibilityIndexDesc("서울특별시", base);
@@ -127,8 +126,8 @@ public class SubwayAccessibilityIndexService {
             ));
         }
 
-        YearMonth baseYearMonth = YearMonth.now().minusMonths(2);
-        DistrictIndex index = districtIndexRepository.findByDistrict_IdAndBaseYearMonth(districtId, baseYearMonth.format(formatter)).orElse(null);
+        String baseYearMonth = districtIndexRepository.findLatestBaseYearMonth();
+        DistrictIndex index = districtIndexRepository.findByDistrict_IdAndBaseYearMonth(districtId, baseYearMonth).orElse(null);
         BigDecimal value = (index != null) ? index.getSubwayAccessibilityIndex().setScale(1, RoundingMode.HALF_UP) : BigDecimal.ZERO;
 
         return new DistrictSubwayDto(

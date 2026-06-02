@@ -5,6 +5,7 @@ import me.rentsignal.locationInfo.dto.ConsumerSentimentIndexDto;
 import me.rentsignal.locationInfo.entity.ProvinceIndex;
 import me.rentsignal.locationInfo.repository.ProvinceIndexRepository;
 import me.rentsignal.locationInfo.type.PeriodType;
+import me.rentsignal.locationInfo.util.YearMonthUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -23,17 +24,16 @@ public class ConsumerSentimentIndexService {
 
     // 현재는 서울특별시 데이터만 반환
     public ConsumerSentimentIndexDto getConsumerSentimentIndex(PeriodType periodType) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMM");
-
         // 데이터가 2개월 지연되어 제공되기 때문에 2개월 전 데이터 사용
-        YearMonth baseYearMonth = YearMonth.now().minusMonths(2);
+        String baseYearMonthText = provinceIndexRepository.findLatestBaseYearMonth();
+        YearMonth baseYearMonth = YearMonthUtils.toYearMonth(baseYearMonthText);
         YearMonth yearMonth = periodType.toComparisonYearMonth(baseYearMonth);
 
-        String formattedYearMonth = yearMonth.format(formatter);
-        ProvinceIndex baseIndex = provinceIndexRepository.findByProvince_NameAndBaseYearMonth("서울특별시", baseYearMonth.format(formatter)).orElse(null);
+        ProvinceIndex baseIndex = provinceIndexRepository.findByProvince_NameAndBaseYearMonth("서울특별시", baseYearMonthText).orElse(null);
         BigDecimal baseValue = (baseIndex != null) ? baseIndex.getConsumerSentimentIndex() : BigDecimal.ZERO;
 
         BigDecimal value;
+        String formattedYearMonth = YearMonthUtils.formatYearMonth(yearMonth);
         if (periodType == PeriodType.CURRENT) {
             value = baseValue.setScale(1, RoundingMode.HALF_UP);
         } else {
@@ -55,9 +55,8 @@ public class ConsumerSentimentIndexService {
 
     /** baseYearMonth로부터 6개월 전까지의 데이터 조회 */
     private List<ConsumerSentimentIndexDto.MonthlyConsumerSentimentIndexDto> getConsumerSentimentIndexTrend(YearMonth baseYearMonth) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMM");
-        String end = baseYearMonth.format(formatter);
-        String start = baseYearMonth.minusMonths(6).format(formatter);
+        String end = YearMonthUtils.formatYearMonth(baseYearMonth);
+        String start = YearMonthUtils.formatYearMonth(baseYearMonth.minusMonths(6));
 
         List<ProvinceIndex> indexes = provinceIndexRepository.findByProvince_NameAndBaseYearMonthBetweenOrderByBaseYearMonthAsc("서울특별시", start, end);
 
