@@ -13,8 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.RoundingMode;
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -44,11 +42,7 @@ public class HomeService {
     }
 
     public List<RankItemDto> getSubwayAccessibilityRanking() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMM");
-
-        String baseYearMonth = YearMonth.now()
-                .minusMonths(2)
-                .format(formatter);
+        String baseYearMonth = districtIndexRepository.findLatestBaseYearMonth();
 
         List<DistrictIndex> indexes = districtIndexRepository
                 .findByDistrict_Province_NameAndBaseYearMonthOrderBySubwayAccessibilityIndexDesc(
