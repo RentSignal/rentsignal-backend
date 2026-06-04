@@ -15,12 +15,12 @@ import me.rentsignal.locationInfo.entity.TransportType;
 import me.rentsignal.locationInfo.repository.DistrictIndexRepository;
 import me.rentsignal.locationInfo.repository.NeighborhoodTransportRepository;
 import me.rentsignal.locationInfo.util.YearMonthUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +35,7 @@ public class SubwayAccessibilityIndexService {
     private final DistrictRepository districtRepository;
     private final NeighborhoodTransportRepository neighborhoodTransportRepository;
 
+    @Cacheable(value = "subway-accessibility-index")
     public SubwayAccessibilityIndexDto getSubwayAccessibilityIndex() {
         // 데이터가 2개월 지연되어 제공되기 때문에 2개월 전 데이터 사용
         String base = districtIndexRepository.findLatestBaseYearMonth();
@@ -109,6 +110,7 @@ public class SubwayAccessibilityIndexService {
         );
     }
 
+    @Cacheable(value = "district-subway-station", key = "#districtId")
     public DistrictSubwayDto getSubwayStationByDistrict(Long districtId) {
         District district = districtRepository.findById(districtId).orElseThrow(
                 () -> new BaseException(ErrorCode.DISTRICT_NOT_FOUND, "해당 id의 시/군/구가 존재하지 않습니다."));

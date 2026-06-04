@@ -11,6 +11,7 @@ import me.rentsignal.locationInfo.entity.RegionIndex;
 import me.rentsignal.locationInfo.repository.RegionIndexRepository;
 import me.rentsignal.locationInfo.type.PeriodType;
 import me.rentsignal.locationInfo.util.YearMonthUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -29,6 +30,7 @@ public class RentIndexService {
     private final RegionIndexRepository regionIndexRepository;
     private final LocationInfoService locationInfoService;
 
+    @Cacheable(value = "current-rent-index", key = "#housingType")
     public CurrentRentIndexDto getCurrentRentIndex(HousingType housingType) {
         // 데이터가 1개월 지연되어 제공되기 때문에 1개월 전 데이터 사용
         String baseYearMonth = regionIndexRepository.findLatestBaseYearMonth();
@@ -50,6 +52,7 @@ public class RentIndexService {
         return new CurrentRentIndexDto(list);
     }
 
+    @Cacheable(value = "previous-rent-index", key = "#housingType + ':' + #periodType")
     public RentIndexChangeDto getRentIndexChange(HousingType housingType, PeriodType periodType) {
         String baseYearMonthText = regionIndexRepository.findLatestBaseYearMonth();
         YearMonth baseYearMonth = YearMonthUtils.toYearMonth(baseYearMonthText);

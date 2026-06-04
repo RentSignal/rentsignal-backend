@@ -6,12 +6,12 @@ import me.rentsignal.locationInfo.entity.ProvinceIndex;
 import me.rentsignal.locationInfo.repository.ProvinceIndexRepository;
 import me.rentsignal.locationInfo.type.PeriodType;
 import me.rentsignal.locationInfo.util.YearMonthUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +23,7 @@ public class ConsumerSentimentIndexService {
     private final LocationInfoService locationInfoService;
 
     // 현재는 서울특별시 데이터만 반환
+    @Cacheable(value = "consumer-sentiment-index", key = "#periodType")
     public ConsumerSentimentIndexDto getConsumerSentimentIndex(PeriodType periodType) {
         // 데이터가 2개월 지연되어 제공되기 때문에 2개월 전 데이터 사용
         String baseYearMonthText = provinceIndexRepository.findLatestBaseYearMonth();

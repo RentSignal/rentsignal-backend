@@ -5,6 +5,7 @@ import me.rentsignal.locationInfo.dto.DistrictSafetyDto;
 import me.rentsignal.locationInfo.dto.RankItemDto;
 import me.rentsignal.locationInfo.entity.DistrictSafety;
 import me.rentsignal.locationInfo.repository.DistrictSafetyRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -18,6 +19,7 @@ public class SafetyService {
 
     private final DistrictSafetyRepository districtSafetyRepository;
 
+    @Cacheable(value = "safety")
     public DistrictSafetyDto getSafety() {
         List<DistrictSafety> districtSafetyList = districtSafetyRepository.findByDistrict_Province_NameOrderBySafetyScoreDesc("서울특별시");
 

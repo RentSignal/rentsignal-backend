@@ -28,7 +28,7 @@ public class LocationLivingFactorController {
     }
 
     @GetMapping("/convenience/{neighborhoodId}")
-    public ResponseEntity<?> getConvenienceRanking(@PathVariable Long neighborhoodId) {
+    public ResponseEntity<?> getConvenienceTypeCount(@PathVariable Long neighborhoodId) {
         ConvenienceTypeCountDto convenienceTypeCount = convenienceService.getConvenienceTypeCount(neighborhoodId);
         return ResponseEntity.ok().body(BaseResponse.success(convenienceTypeCount));
     }

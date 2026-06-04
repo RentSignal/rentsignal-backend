@@ -10,6 +10,7 @@ import me.rentsignal.locationInfo.dto.ConvenienceTypeCountDto;
 import me.rentsignal.locationInfo.dto.NeighborhoodConvenienceQueryDto;
 import me.rentsignal.locationInfo.entity.ConvenienceType;
 import me.rentsignal.locationInfo.repository.NeighborhoodConvenienceRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ public class ConvenienceService {
     private final NeighborhoodConvenienceRepository neighborhoodConvenienceRepository;
     private final NeighborhoodRepository neighborhoodRepository;
 
+    @Cacheable(value = "convenience-ranking")
     public ConvenienceRankDto getConvenienceRanking() {
         List<NeighborhoodConvenienceQueryDto> topNeighborhoodConvenienceCount = neighborhoodConvenienceRepository.findTopNeighborhoodConvenienceCount(PageRequest.of(0, 7));
 
@@ -45,6 +47,7 @@ public class ConvenienceService {
         return new ConvenienceRankDto(ranking);
     }
 
+    @Cacheable(value = "neighborhood-convenience", key = "#neighborhoodId")
     public ConvenienceTypeCountDto getConvenienceTypeCount(Long neighborhoodId) {
         Neighborhood neighborhood = neighborhoodRepository.findById(neighborhoodId).orElseThrow(
                 () -> new BaseException(ErrorCode.NEIGHBORHOOD_NOT_FOUND, "해당 id의 읍/면/동이 존재하지 않습니다."));
