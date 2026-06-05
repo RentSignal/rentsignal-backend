@@ -15,6 +15,7 @@ import me.rentsignal.locationInfo.entity.TransportType;
 import me.rentsignal.locationInfo.repository.NeighborhoodTransportRepository;
 import me.rentsignal.locationInfo.repository.SubwayTravelTimeRepository;
 import me.rentsignal.locationInfo.type.BusinessDistrictType;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -32,6 +33,7 @@ public class TransportService {
     private final NeighborhoodRepository neighborhoodRepository;
 
     /** 환승 제외 주요 업무지구까지 20분 이내 소요되는 지하철역 조회 */
+    @Cacheable(value = "business-district-neighborhood", key = "#businessDistrictType")
     public List<RecommendedNeighborhoodByBusinessDistrict> getRecommendedNeighborhoodByBusinessDistrict(BusinessDistrictType businessDistrictType) {
         String neighborhoodTransportName = convertToNeighborhoodTransportName(businessDistrictType);
         String[] names = neighborhoodTransportName.split(",");
@@ -221,6 +223,7 @@ public class TransportService {
             int seconds
     ) {}
 
+    @Cacheable(value = "neighborhood=transport", key = "#neighborhoodId")
     public NeighborhoodTransportDto getNeighborhoodTransport(Long neighborhoodId) {
         Neighborhood neighborhood = neighborhoodRepository.findById(neighborhoodId).orElseThrow(
                 () -> new BaseException(ErrorCode.NEIGHBORHOOD_NOT_FOUND, "해당 id의 읍/면/동이 존재하지 않습니다."));

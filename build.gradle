@@ -43,6 +43,10 @@ dependencies {
 
     // JTS
     implementation 'org.locationtech.jts:jts-core:1.19.0'
+
+    // Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
 }
 
 test {
