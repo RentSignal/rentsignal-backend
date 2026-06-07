@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import me.rentsignal.community.dto.PostListItemResponse;
 import me.rentsignal.global.response.BaseResponse;
 import me.rentsignal.home.service.HomeService;
-import me.rentsignal.locationInfo.dto.RankItemDto;
+import me.rentsignal.home.dto.HomeSubwayRankingResponse;
 import me.rentsignal.recommendation.dto.RecommendResponseDto;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +30,7 @@ public class HomeController {
     }
 
     @GetMapping("/subway-accessibility-ranking")
-    public BaseResponse<List<RankItemDto>> getSubwayAccessibilityRanking() {
+    public BaseResponse<List<HomeSubwayRankingResponse>> getSubwayAccessibilityRanking() {
         return BaseResponse.success(homeService.getSubwayAccessibilityRanking());
     }
 }
