@@ -3,7 +3,6 @@ package me.rentsignal.home.service;
 import lombok.RequiredArgsConstructor;
 import me.rentsignal.community.dto.PostListItemResponse;
 import me.rentsignal.community.repository.PostRepository;
-import me.rentsignal.locationInfo.dto.RankItemDto;
 import me.rentsignal.locationInfo.entity.DistrictIndex;
 import me.rentsignal.locationInfo.repository.DistrictIndexRepository;
 import me.rentsignal.recommendation.dto.RecommendRequestDto;
@@ -11,6 +10,7 @@ import me.rentsignal.recommendation.dto.RecommendResponseDto;
 import me.rentsignal.recommendation.service.RecommendationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import me.rentsignal.home.dto.HomeSubwayRankingResponse;
 
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ public class HomeService {
                 .getRecommendedNeighborhoods();
     }
 
-    public List<RankItemDto> getSubwayAccessibilityRanking() {
+    public List<HomeSubwayRankingResponse> getSubwayAccessibilityRanking() {
         String baseYearMonth = districtIndexRepository.findLatestBaseYearMonth();
 
         List<DistrictIndex> indexes = districtIndexRepository
@@ -50,15 +50,18 @@ public class HomeService {
                         baseYearMonth
                 );
 
-        List<RankItemDto> ranking = new ArrayList<>();
+        List<HomeSubwayRankingResponse> ranking = new ArrayList<>();
 
         for (int i = 0; i < Math.min(5, indexes.size()); i++) {
             DistrictIndex index = indexes.get(i);
 
-            ranking.add(new RankItemDto(
+            ranking.add(new HomeSubwayRankingResponse(
                     i + 1,
+                    index.getDistrict().getId(),
                     index.getDistrict().getName(),
-                    index.getSubwayAccessibilityIndex().setScale(1, RoundingMode.HALF_UP)
+                    index.getSubwayAccessibilityIndex()
+                            .setScale(1, RoundingMode.HALF_UP)
+                            .doubleValue()
             ));
         }
 
