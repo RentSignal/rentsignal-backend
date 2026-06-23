@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -172,6 +173,16 @@ public class CommunityController {
 
         return BaseResponse.success(
                 communityService.getMyLikedPosts(principal, pageable)
+        );
+    }
+
+    // 동네 이름으로 검색
+    @GetMapping("/neighborhoods/search")
+    public BaseResponse<List<NeighborhoodSearchResponse>> searchNeighborhoods(
+            @RequestParam String keyword
+    ) {
+        return BaseResponse.success(
+                communityService.searchNeighborhoods(keyword)
         );
     }
 

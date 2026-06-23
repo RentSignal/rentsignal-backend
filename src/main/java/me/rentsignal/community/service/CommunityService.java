@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -303,5 +304,15 @@ public class CommunityService {
         return postLikeRepository
                 .findByUser(user, pageable)
                 .map(postLike -> PostListItemResponse.from(postLike.getPost()));
+    }
+    // 동네이름으로 검색
+    @Transactional(readOnly = true)
+    public List<NeighborhoodSearchResponse> searchNeighborhoods(String keyword) {
+
+        return neighborhoodRepository
+                .findTop10ByNameContaining(keyword)
+                .stream()
+                .map(NeighborhoodSearchResponse::from)
+                .toList();
     }
 }
