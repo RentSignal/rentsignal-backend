@@ -24,8 +24,9 @@ public class PostDetailResponse {
     private String role;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Boolean isLiked;
 
-    public static PostDetailResponse from(Post post, Role role) {
+    public static PostDetailResponse from(Post post, Role role, Boolean isLiked) {
         return PostDetailResponse.builder()
                 .id(post.getId())
                 .title(post.getTitle())
@@ -42,6 +43,7 @@ public class PostDetailResponse {
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .role(role.name())
+                .isLiked(isLiked)
                 .build();
     }
 }
