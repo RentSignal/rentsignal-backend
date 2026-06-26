@@ -67,7 +67,9 @@ public class CommunityService {
 
         post.increaseViewCount();
 
-        return PostDetailResponse.from(post, user.getRole());
+        boolean isLiked = postLikeRepository.existsByPostAndUser(post, user);
+
+        return PostDetailResponse.from(post, user.getRole(), isLiked);
     }
 
     // 게시글 작성
